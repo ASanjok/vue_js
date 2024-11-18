@@ -59,7 +59,7 @@ const animes = ref([]);
 // Функция для получения данных из Django
 const fetchAnimes = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/v1/animeList/');
+    const response = await fetch('http://localhost:8000/api/v1/animeList/');
     const data = await response.json();
     animes.value = data;
   } catch (error) {
@@ -88,7 +88,7 @@ const submitAnimeData = async () => {
   };
 
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/v1/animeList/', {
+    const response = await fetch('http://localhost:8000/api/v1/animeList/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
