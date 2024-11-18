@@ -63,7 +63,8 @@ const fetchAnimes = async () => {
     const data = await response.json();
     animes.value = data;
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error:', error);
+    alert('There was an error with the GET request');
   }
 };
 
@@ -77,13 +78,13 @@ const showMessage = ref(false)
 
 const submitAnimeData = async () => {
   if (!animeName.value || !episodeCount.value) {
-    showMessage.value = true; //-------------------------------------------------------------?????????????????????
+    showMessage.value = true;
     return;
   }
 
   const animeData = {
     name: animeName.value,
-    episodeСount: episodeCount.value
+    episodeCount: episodeCount.value
   };
 
   try {
@@ -95,19 +96,19 @@ const submitAnimeData = async () => {
       body: JSON.stringify(animeData),
     });
 
-    if (response.ok) {
-      alert('Anime added successfully!');
-      
+    if (response.ok) {      
       animeName.value = '';
       episodeCount.value = '';
-      } else {
+
+    } else {
       alert('Error adding anime');
-      }
+    }
   } catch (error) {
     console.error('Error:', error);
-    alert('There was an error with the request');
+    alert('There was an error with the POSTrequest');
   }
 showMessage.value = false
+fetchAnimes();
 }
 
 
