@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from debug_toolbar.toolbar import debug_toolbar_urls
+
 from firstApp.views import FirstProjectAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/animeList/', FirstProjectAPIView.as_view(), name = 'anime-list')
-]
+] + debug_toolbar_urls()

@@ -7,7 +7,7 @@ from .models import Anime
 
 class FirstProjectAPIView(APIView):
     def get(self, request):
-        Animes = Anime.objects.all()
+        Animes = Anime.objects.select_related('statusF').all()
         serializer = AnimeSerializerGetAll(Animes, many=True)
         return Response(serializer.data)
     
