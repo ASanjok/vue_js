@@ -1,5 +1,5 @@
 # start with python image
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # work directory
 WORKDIR /app
@@ -15,4 +15,4 @@ RUN python manage.py migrate
 EXPOSE 8000
 
 # commands to start app
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "first_project.wsgi:application"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
