@@ -1,4 +1,5 @@
-# one_page2
+## switch dir to one_page2
+cd one_page2
 
 ## Project setup
 ```
