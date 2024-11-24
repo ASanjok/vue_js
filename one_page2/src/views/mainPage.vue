@@ -1,8 +1,9 @@
 <template>
-    <div>
-        <b-button v-b-toggle.collapse-1 variant="primary">Toggle Collapse</b-button>
-        <b-collapse id="collapse-1" class="mt-2">
-            <b-card>
+    <div style="position: relative; height:90vh;">
+        <!-- Collapse menu -->
+        <b-button v-b-toggle.collapse-1 variant="primary" class="rounded-0" style="position: absolute;z-index: 10; top:-3vh; width: 33vw;">Toggle Collapse</b-button>
+        <b-collapse id="collapse-1" class="mt-2" style="position: absolute; top:1vh; z-index: 10; width: 33vw;">
+            <b-card style="position:absolute; z-index: 10;">
                 <p class="card-text">Collapse contents Here</p>
                 <b-button v-b-toggle.collapse-1-inner size="sm">Toggle Inner Collapse</b-button>
                 <b-collapse id="collapse-1-inner" class="mt-2">
@@ -11,7 +12,30 @@
             </b-card>
         </b-collapse>
 
-        <div id="map" style="width: 100%; height: 100vh;"></div>
+        <b-button v-b-toggle.collapse-2 variant="primary" class="rounded-0" style="position: absolute; left: 33vw; top:-3vh; width: 33vw; z-index: 10;">Toggle Collapse</b-button>
+        <b-collapse id="collapse-2" class="mt-2" style="position: absolute; left: 33vw; top:1vh; width: 33vw; z-index: 10;">
+            <b-card style="position:absolute; z-index: 10;">
+                <p class="card-text">Collapse contents Here</p>
+                <b-button v-b-toggle.collapse-1-inner size="sm">Toggle Inner Collapse</b-button>
+                <b-collapse id="collapse-1-inner" class="mt-2">
+                    <b-card>Hello!</b-card>
+                </b-collapse>
+            </b-card>
+        </b-collapse>
+
+        <b-button v-b-toggle.collapse-3 variant="primary" class="rounded-0" style="position: absolute; left: 66vw; top:-3vh; width: 34vw; z-index: 10;">Toggle Collapse</b-button>
+        <b-collapse id="collapse-3" class="mt-2" style="position: absolute; left: 66vw; top:1vh; width: 34vw; z-index: 10;">
+            <b-card style="position:absolute; z-index: 10;">
+                <p class="card-text">Collapse contents Here</p>
+                <b-button v-b-toggle.collapse-1-inner size="sm">Toggle Inner Collapse</b-button>
+                <b-collapse id="collapse-1-inner" class="mt-2">
+                    <b-card>Hello!</b-card>
+                </b-collapse>
+            </b-card>
+        </b-collapse>
+
+        <!-- Map container -->
+        <div id="map" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
     </div>
 </template>
 
@@ -52,3 +76,13 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+#map {
+    position: absolute; /* Ensure the map covers the whole screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+</style>
