@@ -3,8 +3,6 @@
     <div style="height: 10vh;">
       <b-navbar type="dark" variant="info">
         <b-navbar-brand to="/">A. Sloka</b-navbar-brand>
-
-        <!-- Центрируем элементы с использованием Flexbox -->
         <b-navbar-nav class="d-flex mx-auto justify-content-center">
           <b-nav-item to="/firstPage">First Page</b-nav-item>
           <b-nav-item to="/secondPage">Second Page</b-nav-item>
