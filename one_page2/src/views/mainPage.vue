@@ -1,46 +1,43 @@
 <template>
-    <div style="position: relative; height:90vh;">
-        <!-- Collapse menu -->
-        <b-button v-b-toggle.collapse-1 variant="info" class="rounded-0"
-            style="position: absolute;z-index: 10; top:-3vh; width: 33vw;">Toggle Collapse</b-button>
-        <b-collapse id="collapse-1" class="mt-2" style="position: absolute; top:1vh; z-index: 10; width: 33vw;">
-            <b-card style="position:absolute; z-index: 10;">
-                <p class="card-text">Collapse contents Here</p>
-                <b-button v-b-toggle.collapse-1-inner size="sm">Toggle Inner Collapse</b-button>
-                <b-collapse id="collapse-1-inner" class="mt-2">
-                    <b-card>Hello!</b-card>
-                </b-collapse>
-            </b-card>
-        </b-collapse>
+    <div>
+        <b-navbar toggleable="lg" type="dark" variant="info">
+            <b-navbar-brand href="#">NavBar</b-navbar-brand>
 
-        <b-button v-b-toggle.collapse-2 variant="info" class="rounded-0"
-            style="position: absolute; left: 33vw; top:-3vh; width: 33vw; z-index: 10;">Toggle Collapse</b-button>
-        <b-collapse id="collapse-2" class="mt-2"
-            style="position: absolute; left: 33vw; top:1vh; width: 33vw; z-index: 10;">
-            <b-card style="position:absolute; z-index: 10; width: 33vw">
-                <p class="card-text">Collapse contents Here</p>
-                <b-button v-b-toggle.collapse-2-inner>Toggle Inner Collapse</b-button>
-                <b-collapse id="collapse-2-inner" class="mt-2">
-                    <b-card>Hello!</b-card>
-                </b-collapse>
-            </b-card>
-        </b-collapse>
+            <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
-        <b-button v-b-toggle.collapse-3 variant="info" class="rounded-0"
-            style="position: absolute; left: 66vw; top:-3vh; width: 34vw; z-index: 10;">Toggle Collapse</b-button>
-        <b-collapse id="collapse-3" class="mt-2"
-            style="position: absolute; left: 66vw; top:1vh; width: 34vw; z-index: 10;">
-            <b-card style="position:absolute; z-index: 10;">
-                <p class="card-text">Collapse contents Here</p>
-                <b-button v-b-toggle.collapse-3-inner size="sm">Toggle Inner Collapse</b-button>
-                <b-collapse id="collapse-3-inner" class="mt-2">
-                    <b-card>Hello!</b-card>
-                </b-collapse>
-            </b-card>
-        </b-collapse>
+            <b-collapse id="nav-collapse" is-nav>
+                <b-navbar-nav>
+                    <b-nav-item href="#">Link</b-nav-item>
+                    <b-nav-item href="#" disabled>Disabled</b-nav-item>
+                </b-navbar-nav>
 
+                <!-- Right aligned nav items -->
+                <b-navbar-nav class="ml-auto">
+                    <b-nav-form>
+                        <b-form-input size="sm" class="mr-sm-2" placeholder="Search"></b-form-input>
+                        <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
+                    </b-nav-form>
+
+                    <b-nav-item-dropdown text="Lang" right>
+                        <b-dropdown-item href="#">EN</b-dropdown-item>
+                        <b-dropdown-item href="#">ES</b-dropdown-item>
+                        <b-dropdown-item href="#">RU</b-dropdown-item>
+                        <b-dropdown-item href="#">FA</b-dropdown-item>
+                    </b-nav-item-dropdown>
+
+                    <b-nav-item-dropdown right>
+                        <!-- Using 'button-content' slot -->
+                        <template #button-content>
+                            <em>User</em>
+                        </template>
+                        <b-dropdown-item href="#">Profile</b-dropdown-item>
+                        <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+                    </b-nav-item-dropdown>
+                </b-navbar-nav>
+            </b-collapse>
+        </b-navbar>
         <!-- Map container Maplibre gl js-->
-        <div id="map" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+        <div id="map"></div>
     </div>
 </template>
 
@@ -50,39 +47,54 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default {
-    name: 'MainPage',
     mounted() {
-        this.initMap();
-    },
-    methods: {
-        initMap() {
-            const map = new maplibregl.Map({
-                container: 'map',
-                style: 'https://api.maptiler.com/maps/outdoor-v2/style.json?key=SNBPG5wFM6FhUXbN07ua',
-                center: [24.562966769607783, 56.798003718105406], // starting position [lng, lat]
-                zoom: 6.743059121016559,
-                minZoom: 5.5,
-                maxZoom: 9,
-            });
+        // Инициализация карты в хуке mounted
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://api.maptiler.com/maps/outdoor-v2/style.json?key=SNBPG5wFM6FhUXbN07ua',
+            center: [29, 40], // начальная позиция [lng, lat]
+            zoom: 2,
+            minZoom: 5.5,
+            maxZoom: 9,
+        });
 
-            map.on('moveend', () => {
-                const newCenter = map.getCenter();  // console out to check information
-                const zoomvalue = map.getZoom();
-                console.log('New center after move:', newCenter);
-                console.log('New zoom after move - ', zoomvalue);
+        map.on('moveend', () => {
+            const newCenter = map.getCenter(); // выводим в консоль для проверки
+            const zoomValue = map.getZoom();
+            console.log('New center after move:', newCenter);
+            console.log('New zoom after move - ', zoomValue);
+        });
+
+        map.on('load', () => {
+            // Когда карта загружена, выполняем полёт
+            map.flyTo({
+                center: [24.56, 56.79],
+                zoom: 6,
+                bearing: 0,
+                speed: 0.5,
+                curve: 0.1,
+                easing(t) {
+                    if (t < 2) {
+                        t = t * (2 - t)
+                    }
+                    return t;
+                },
+                essential: true,
             });
-        }
+        });
+
+
     }
-}
+};
 </script>
 
 <style scoped>
 #map {
     position: absolute;
     /* Ensure the map covers the whole screen */
-    top: 0;
+    top: 112px;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 112px);
 }
 </style>

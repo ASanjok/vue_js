@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div style="height: 10vh;">
+    <div>
       <b-navbar type="dark" variant="info">
         <b-navbar-brand to="/">A. Sloka</b-navbar-brand>
         <b-navbar-nav class="d-flex mx-auto justify-content-center">
