@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import FirstPageView from '../views/firstPage.vue'
-import SecondPageView from '../views/secondPage.vue'
-import MainPageView from '../views/mainPage.vue'
+import testVuePageView from '../views/testVuePage.vue'
+import djangoAnimePageView from '../views/djangoAnimePage.vue'
+import MapPageView from '../views/mainMapPage.vue'
 // import { component } from 'vue/types/umd'
 
 Vue.use(VueRouter)
@@ -10,16 +10,16 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/firstPage',
-    component: FirstPageView
+    component: testVuePageView
   },
   {
     path: '/secondPage',
     // component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-    component: SecondPageView
+    component: djangoAnimePageView
   },
   {
     path: '/',
-    component: MainPageView
+    component: MapPageView
   }
 ]
 
