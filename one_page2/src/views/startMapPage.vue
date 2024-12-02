@@ -18,11 +18,10 @@
                         <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
                     </b-nav-form>
 
-                    <b-nav-item-dropdown text="Lang" right>
-                        <b-dropdown-item href="#">EN</b-dropdown-item>
-                        <b-dropdown-item href="#">ES</b-dropdown-item>
-                        <b-dropdown-item href="#">RU</b-dropdown-item>
-                        <b-dropdown-item href="#">FA</b-dropdown-item>
+                    <b-nav-item-dropdown :text="currentStyle.name" right>
+                        <b-dropdown-item v-for="style in styles" :key="style.name" @click="changeMapStyle(style)">
+                            {{ style.name }}
+                        </b-dropdown-item>
                     </b-nav-item-dropdown>
 
                     <b-nav-item-dropdown right>
@@ -38,6 +37,13 @@
         </b-navbar>
         <!-- Map container Maplibre gl js-->
         <div id="map"></div>
+        <div v-if="coordinates"
+            class="position-absolute bottom-0 start-0 p-2 bg-dark bg-opacity-50 text-white fs-6 lh-sm">
+            Longitude: {{ coordinates.lng }}<br />
+            Latitude: {{ coordinates.lat }}<br />
+            Zoom: {{ zoom }}
+        </div>
+
     </div>
 </template>
 
@@ -48,174 +54,252 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import * as turf from 'turf';
 
 export default {
-    mounted() {
-        // Инициализация карты в хуке mounted
-        const map = new maplibregl.Map({
-            container: 'map',
-            style: 'https://api.maptiler.com/maps/outdoor-v2/style.json?key=SNBPG5wFM6FhUXbN07ua',
-            center: [29, 40], // начальная позиция [lng, lat]
-            zoom: 2,
-            // minZoom: 5.5,
-            maxZoom: 9,
-        });
+    data() {
+        return {
+            map: null,
+            startCoordinates: [24.7, 56.9],
+            coordinates: null,
+            zoom: null,
 
-        map.on('moveend', () => {
-            const newCenter = map.getCenter(); // выводим в консоль для проверки
-            const zoomValue = map.getZoom();
-            console.log('New center after move:', newCenter);
-            console.log('New zoom after move - ', zoomValue);
-        });
+            route: null,
+            point: null,
+            counter: 0,
 
-        map.on('load', () => {
-            // Когда карта загружена, выполняем полёт
-            map.flyTo({
-                center: [24.56, 56.79],
-                zoom: 6,
-                bearing: 0,
-                speed: 0.5,
-                curve: 0.1,
-                easing(t) {
-                    if (t < 2) {
-                        t = t * (2 - t)
-                    }
-                    return t;
-                },
-                essential: true,
-            });
-        });
+            poligon: null,
 
-        const route = {
-            'type': 'FeatureCollection',
-            'features': [
-                {
-                    'type': 'Feature',
-                    'geometry': {
-                        'type': 'LineString',
-                        'coordinates': [[-122.414, 37.776], [-77.032, 38.913]]
-                    }
-                }
-            ]
+            styles: [
+                { name: 'liberty', url: 'https://tiles.openfreemap.org/styles/liberty' },
+                { name: 'bright', url: 'https://tiles.openfreemap.org/styles/bright' },
+                { name: 'dark', url: 'https://tiles.openfreemap.org/styles/dark' },
+            ],
+            currentStyle: { name: 'liberty', url: 'https://tiles.openfreemap.org/styles/liberty' },
         };
+    },
+    mounted() {
+        this.map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://tiles.openfreemap.org/styles/liberty',
+            center: this.startCoordinates,
+            zoom: 6.5,
+        });
 
-        const point = {
-            'type': 'FeatureCollection',
-            'features': [
-                {
+        this.map.on('moveend', () => {
+            this.coordinates = this.map.getCenter();
+            this.zoom = this.map.getZoom();
+        });
+
+        this.map.on('load', () => {
+            this.startAnimation();
+            this.createPoligon();
+        });
+    },
+    methods: {
+        changeMapStyle(style) {
+            this.map.setStyle(style.url);
+            this.currentStyle = style;
+
+            // Используем событие 'styledata', чтобы дождаться окончания загрузки стиля
+            this.map.on('styledata', () => {
+                // После изменения стиля, создаем слои и источники заново, если их нет
+                if (!this.map.getSource('route')) {
+                    this.map.addSource('route', {
+                        'type': 'geojson',
+                        'data': this.route
+                    });
+                }
+
+                if (!this.map.getSource('point')) {
+                    this.map.addSource('point', {
+                        'type': 'geojson',
+                        'data': this.point
+                    });
+                }
+
+                if (!this.map.getLayer('route')) {
+                    this.map.addLayer({
+                        'id': 'route',
+                        'source': 'route',
+                        'type': 'line',
+                        'paint': {
+                            'line-width': 2,
+                            'line-color': '#007cbf'
+                        }
+                    });
+                }
+
+                if (!this.map.getLayer('point')) {
+                    this.map.addLayer({
+                        'id': 'point',
+                        'source': 'point',
+                        'type': 'circle',
+                        'paint': {
+                            'circle-radius': 10,
+                            'circle-color': '#ff0000'
+                        }
+                    });
+                }
+
+                // Перезапускаем анимацию
+                this.animatePoint();
+            });
+        },
+
+        createPoligon() {
+            this.map.addSource('source', {
+                'type': 'geojson',
+                'data': {
                     'type': 'Feature',
                     'properties': {},
                     'geometry': {
-                        'type': 'Point',
-                        'coordinates': [-122.414, 37.776]
+                        'type': 'Polygon',
+                        'coordinates': [
+                            [
+                                [24.19637, 56.94769],
+                                [24.21724, 56.94479],
+                                [24.21453, 56.93785],
+                                [24.21893, 56.93706],
+                                [24.22158, 56.93572],
+                                [24.21123, 56.93165],
+                                [24.19576, 56.93220],
+                                [24.19637, 56.94769],
+                            ]
+                        ]
                     }
                 }
-            ]
-        };
-
-        const lineDistance = turf.lineDistance(route.features[0], 'kilometers');
-
-        const arc = [];
-
-        // Number of steps to use in the arc and animation, more steps means
-        // a smoother arc and animation, but too many steps will result in a
-        // low frame rate
-        const steps = 500;
-        for (let i = 0; i < lineDistance; i += lineDistance / steps) {
-            const segment = turf.along(route.features[0], i, 'kilometers');
-            arc.push(segment.geometry.coordinates);
-        }
-
-        route.features[0].geometry.coordinates = arc;
-
-        // Used to increment the value of the point measurement against the route.
-        let counter = 0;
-
-        map.on('load', () => {
-            // Add a source and layer displaying a point which will be animated in a circle.
-            map.addSource('route', {
-                'type': 'geojson',
-                'data': route
             });
-
-            map.addSource('point', {
-                'type': 'geojson',
-                'data': point
-            });
-
-            map.addLayer({
-                'id': 'route',
-                'source': 'route',
-                'type': 'line',
+            this.map.addLayer({
+                'id': 'pattern-layer',
+                'type': 'fill',
+                'source': 'source',
                 'paint': {
-                    'line-width': 2,
-                    'line-color': '#007cbf'
+                    'fill-color': '#ff0000',
+                    'fill-opacity': 0.5
                 }
             });
+        },
 
-            map.addLayer({
-                'id': 'point',
-                'source': 'point',
-                'type': 'symbol',
-                'layout': {
-                    'icon-image': 'airport_15',
-                    'icon-rotate': ['get', 'bearing'],
-                    'icon-rotation-alignment': 'map',
-                    'icon-overlap': 'always',
-                    'icon-ignore-placement': true
-                }
-            });
+        createRout() { // create full route
+            this.route = {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [[25.2, 58.1], [26.6, 55.7], [20.9, 56.4], [28.2, 56.3]]
+                        }
+                    }
+                ]
+            };
+        },
 
-            function animate() {
-                // Update point geometry to a new position based on counter denoting
-                // the index to access the arc.
-                point.features[0].geometry.coordinates =
-                    route.features[0].geometry.coordinates[counter];
+        createPoint() { // create a point that is going to be animated
+            this.point = {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'properties': {},
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [25.2, 58.1]
+                        }
+                    }
+                ]
+            };
 
-                // Calculate the bearing to ensure the icon is rotated to match the route arc
-                // The bearing is calculate between the current point and the next point, except
-                // at the end of the arc use the previous point and the current point
-                point.features[0].properties.bearing = turf.bearing(
-                    turf.point(
-                        route.features[0].geometry.coordinates[
-                        counter >= steps ? counter - 1 : counter
-                        ]
-                    ),
-                    turf.point(
-                        route.features[0].geometry.coordinates[
-                        counter >= steps ? counter : counter + 1
-                        ]
-                    )
-                );
+            const lineDistance = turf.lineDistance(this.route.features[0], 'kilometers'); // find distance of route in kilomenters
+            const routeArc = [];
+            const steps = 300; // how many steps will be in animation
 
-                // Update the source with this new data.
-                map.getSource('point').setData(point);
-
-                // Request the next frame of animation so long the end has not been reached.
-                if (counter < steps) {
-                    requestAnimationFrame(animate);
-                }
-
-                counter = counter + 1;
+            for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+                const segment = turf.along(this.route.features[0], i, 'kilometers');
+                routeArc.push(segment.geometry.coordinates);
             }
 
-            document
-                .getElementById('replay')
-                .addEventListener('click', () => {
-                    // Set the coordinates of the original point back to origin
-                    point.features[0].geometry.coordinates = origin;
+            this.route.features[0].geometry.coordinates = routeArc;
+        },
 
-                    // Update the source layer
-                    map.getSource('point').setData(point);
+        startAnimation() {
+            this.createRout()
+            this.createPoint()
 
-                    // Reset the counter
-                    counter = 0;
-
-                    // Restart the animation.
-                    animate(counter);
+            if (!this.map.getSource('route')) { // create a layer with route and point
+                this.map.addSource('route', {
+                    'type': 'geojson',
+                    'data': this.route
                 });
+            }
 
-            // Start the animation.
-            animate(counter);
-        });
+            if (!this.map.getSource('point')) {
+                this.map.addSource('point', {
+                    'type': 'geojson',
+                    'data': this.point
+                });
+            }
+
+            if (!this.map.getLayer('route')) { // add style property for route and point
+                this.map.addLayer({
+                    'id': 'route',
+                    'source': 'route',
+                    'type': 'line',
+                    'paint': {
+                        'line-width': 2,
+                        'line-color': '#007cbf'
+                    }
+                });
+            }
+
+            if (!this.map.getLayer('point')) {
+                this.map.addLayer({
+                    'id': 'point',
+                    'source': 'point',
+                    'type': 'circle',
+                    'paint': {
+                        'circle-radius': 10,
+                        'circle-color': '#ff0000'
+                    }
+                });
+            }
+
+            this.animatePoint();
+        },
+
+        animatePoint() {
+
+            // check for point, to not be outside of coordinate array
+            if (this.counter >= this.route.features[0].geometry.coordinates.length) {
+                console.error("Counter exceeded available route coordinates.");
+                return;
+            }
+
+            const currentCoord = this.route.features[0].geometry.coordinates[this.counter];
+            const prevCoord = this.route.features[0].geometry.coordinates[this.counter >= 1 ? this.counter - 1 : this.counter];
+            const nextCoord = this.route.features[0].geometry.coordinates[this.counter >= this.route.features[0].geometry.coordinates.length - 1 ? this.counter : this.counter + 1];
+
+            // check for coordinates
+            if (!Array.isArray(currentCoord) || !Array.isArray(prevCoord) || !Array.isArray(nextCoord)) {
+                console.error("Invalid coordinates:", { currentCoord, prevCoord, nextCoord });
+                return;
+            }
+
+            // update point coordinate
+            this.point.features[0].geometry.coordinates = currentCoord;
+
+            // calculate angle for point
+            this.point.features[0].properties.bearing = turf.bearing(turf.point(prevCoord), turf.point(nextCoord));
+
+            // update point coordinate on map
+            this.map.getSource('point').setData(this.point);
+
+            if (this.counter < this.route.features[0].geometry.coordinates.length - 1) {
+                setTimeout(() => {
+                    this.counter++;
+                    this.animatePoint();
+                }, 20);
+            }
+        },
+
 
     }
 };

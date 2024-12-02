@@ -1,0 +1,16 @@
+services:
+  django_backend:
+    build:
+      context: ./django/first_project
+    container_name: django_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - vue_frontend
+
+  vue_frontend:
+    build:
+      context: ./one_page2
+    container_name: vue_frontend
+    ports:
+      - "80:80"
