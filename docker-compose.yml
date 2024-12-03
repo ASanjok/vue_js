@@ -5,6 +5,9 @@ services:
     container_name: django_backend
     ports:
       - "8000:8000"
+    restart: always
+    environment:
+      - DEBUG=True
 
   vue_frontend:
     build:
