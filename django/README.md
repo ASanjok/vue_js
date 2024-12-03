@@ -51,3 +51,7 @@ next command must be entered in terminal with the same priveleges (admin, notAdm
 ```sh
 docker build -t <your_image_name> .
 ```
+
+# login password /admin/
+login - admin   
+password - 1234
