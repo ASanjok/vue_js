@@ -94,11 +94,9 @@ export default {
         this.map.on('load', () => {
             this.startAnimation();
             this.createPoligon();
-            this.addPulsingDot(); // Ensure pulsing dot is added after map load
+            this.addPulsingDot(); 
             this.activatePulsingDot();
         });
-
-        //this.pulsingDot().render();
     },
 
     methods: {
@@ -106,7 +104,7 @@ export default {
             this.map.setStyle(style.url);
             this.currentStyle = style;
 
-            // Используем событие 'styledata', чтобы дождаться окончания загрузки стиля
+            // event is triggered when the styledata is updated 
             this.map.on('styledata', () => {
 
                 if (!this.map.getSource('route')) {
@@ -150,14 +148,13 @@ export default {
                         }
                     });
                 }
-
-                // Останавливаем предыдущую анимацию
+                // stop previous animation
                 if (this.animationTimeout) {
                     clearTimeout(this.animationTimeout);
                     this.animationTimeout = null;
                 }
 
-                // Запускаем анимацию
+                // start next animation
                 this.animatePoint();
                 this.createPoligon();
                 this.activatePulsingDot();
@@ -228,7 +225,7 @@ export default {
                             type: 'Feature',
                             geometry: {
                                 type: 'Point',
-                                coordinates: [23.6, 56.7] // Example coordinates for the point
+                                coordinates: [23.6, 56.7] //coordinates for the point
                             }
                         }
                     ]
@@ -364,7 +361,6 @@ export default {
             this.animatePoint();
         },
         animatePoint() {
-            // Обновляем координаты для анимации
             if (this.counter >= this.route.features[0].geometry.coordinates.length) {
                 this.counter = 0;
             }
@@ -373,16 +369,15 @@ export default {
             const prevCoord = this.route.features[0].geometry.coordinates[this.counter >= 1 ? this.counter - 1 : this.counter];
             const nextCoord = this.route.features[0].geometry.coordinates[this.counter >= this.route.features[0].geometry.coordinates.length - 1 ? 0 : this.counter + 1];
 
-            // Обновляем координаты и угол
+            // update coordinates and angle
             this.point.features[0].geometry.coordinates = currentCoord;
             this.point.features[0].properties.bearing = turf.bearing(turf.point(prevCoord), turf.point(nextCoord));
             this.map.getSource('point').setData(this.point);
 
-            // Запускаем таймер с небольшой задержкой
             this.counter++;
             this.animationTimeout = setTimeout(() => {
                 this.animatePoint();
-            }, 20);  // Можно регулировать задержку
+            }, 20); 
         }
     }
 };

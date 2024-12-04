@@ -7,7 +7,7 @@ services:
       - "8000:8000"
     restart: always
     environment:
-      - DEBUG=True
+      - DEBUG=True 
 
   vue_frontend:
     build:
@@ -15,3 +15,6 @@ services:
     container_name: vue_frontend
     ports:
       - "80:80"
+    # environment:
+      # - API_URL=http://django_backend:8000
+      # where is used api url change to process.env.API_URL;
