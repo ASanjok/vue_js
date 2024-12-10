@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     "django.contrib.staticfiles",
     "debug_toolbar",
+    'django.contrib.gis',
 ]
 
 INTERNAL_IPS = [
@@ -58,6 +60,12 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
+
+if os.name == 'nt':
+    os.environ['GDAL_DATA'] = r"env\Lib\site-packages\osgeo\data\gdal"
+    os.environ['PROJ_LIB'] = r"env\Lib\site-packages\osgeo\data\proj"
+    os.environ['PATH'] = r"env\Lib\site-packages\osgeo;" + os.environ['PATH']
+    GDAL_LIBRARY_PATH = r'env\Lib\site-packages\osgeo\gdal303.dll'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -87,11 +95,12 @@ WSGI_APPLICATION = 'first_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django_pg8000',
-        'NAME': 'postgres',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'flights_data_db',
         'USER': 'postgres',
         'PASSWORD': 'Password1234',
-        'HOST': 'localhost',
+        'HOST': 'host.docker.internal',
+        # 'HOST': 'localhost',
         'PORT': '5432',
     }
 }

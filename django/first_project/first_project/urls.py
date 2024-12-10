@@ -19,12 +19,12 @@ from django.urls import path
 
 from debug_toolbar.toolbar import debug_toolbar_urls
 
-from firstApp.views import FirstProjectAPIView
+# from firstApp.views import FirstProjectAPIView
 
-from firstApp.views import FlightsAPIView
+from firstApp.views import FlightsGetAllAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/animeList/', FirstProjectAPIView.as_view(), name = 'anime-list'),
-    path('api/flights/', FlightsAPIView.as_view())
+    # path('api/v1/animeList/', FirstProjectAPIView.as_view(), name = 'anime-list'),
+    path('api/flights/', FlightsGetAllAPIView.as_view())
 ] + debug_toolbar_urls()
