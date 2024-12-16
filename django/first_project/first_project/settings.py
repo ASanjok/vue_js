@@ -105,7 +105,9 @@ DATABASES = {
     }
 }
 
-
+CELERY_BROKER_URL = 'amqp://admin:Password1234@localhost:5672//'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

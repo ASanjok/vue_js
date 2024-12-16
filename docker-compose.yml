@@ -7,7 +7,7 @@ services:
       - "8000:8000"
     restart: always
     environment:
-      - DEBUG=True 
+      - DEBUG=True
 
   vue_frontend:
     build:
@@ -15,6 +15,45 @@ services:
     container_name: vue_frontend
     ports:
       - "80:80"
-    # environment:
+      # environment:
       # - API_URL=http://django_backend:8000
       # where is used api url change to process.env.API_URL;
+
+      # db:
+      #   image: postgres:15
+      #   container_name: postgres
+      #   restart: always
+      #   environment:
+      #     POSTGRES_USER: admin
+      #     POSTGRES_PASSWORD: Password1234
+      #     POSTGRES_DB: flights_data_db
+      #   ports:
+      #     - "5432:5432"
+      #   volumes:
+      #     - db_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: Password1234
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  sender:
+    build:
+      context: ./rabbitmq-vue
+    container_name: producer
+    ports:
+      - "3000:3000"
+    restart: always
+
+
+volumes:
+  db_data:
+  rabbitmq_data:

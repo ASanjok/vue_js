@@ -32,3 +32,12 @@ class FlightsGetAllAPIView(APIView):
         flights = PositionData.objects.select_related('place').all()
         serializer = FlightSerializerGetAll(flights, many=True)
         return Response(serializer.data)
+    
+    def post(self, request):
+        action = request.data.get('action')
+
+        if action == 'get_flights':
+            
+            send_to_rabbitmq_task.delay()
+            return Response({"status": "Request sent to RabbitMQ"}, status=200)
+        return Response({"error": "Invalid action"}, status=400)

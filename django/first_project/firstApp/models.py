@@ -33,7 +33,7 @@ class Place(models.Model):
 class PositionData(models.Model):
     place = models.ForeignKey(Place, on_delete=models.DO_NOTHING, related_name="positions", null=True, blank=True)
 
-    position = models.PointField(geography=True)  # Для координат (latitude, longitude)
+    position = models.PointField(geography=True) 
     altitude = models.FloatField()
     speed = models.FloatField()
     track = models.FloatField()

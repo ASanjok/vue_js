@@ -56,7 +56,7 @@ import slotFromComponent from "@/components/slot.vue";
 
 const animes = ref([]);
 
-// Функция для получения данных из Django
+
 const fetchAnimes = async () => {
   try {
     const response = await fetch('http://localhost:8000/api/v1/animeList/');
