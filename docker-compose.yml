@@ -1,7 +1,7 @@
 services:
   django_backend:
     build:
-      context: ./django/first_project
+      context: ./django/project
     container_name: django_backend
     ports:
       - "8000:8000"
@@ -51,6 +51,14 @@ services:
     container_name: producer
     ports:
       - "3000:3000"
+    restart: always
+
+  consumer:
+    build:
+      context: ./consumer
+    container_name: consumer
+    ports:
+      - "8080:8080"
     restart: always
 
 
