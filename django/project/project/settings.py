@@ -28,7 +28,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+CELERY_BROKER_URL = 'amqp://admin:Password1234@localhost:5672' 
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'rpc://' 
 
 GDAL_LIBRARY_PATH = r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\gdal303.dll"
 os.environ["GDAL_LIBRARY_PATH"] = GDAL_LIBRARY_PATH

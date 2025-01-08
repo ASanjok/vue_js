@@ -24,5 +24,5 @@ from first_part.views import FlightsGetAllAPIView
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('api/v1/animeList/', FirstProjectAPIView.as_view(), name = 'anime-list'),
-    path('api/flights/', FlightsGetAllAPIView.as_view())
+    path('api/get_positions/', FlightsGetAllAPIView.as_view())
 ] + debug_toolbar_urls()

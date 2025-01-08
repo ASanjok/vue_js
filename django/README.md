@@ -76,3 +76,16 @@ docker build -t <your_image_name> .
 # login password /admin/
 login - admin   
 password - 1234
+
+
+
+
+
+
+
+
+
+
+in project dir
+celery - celery -A project worker --loglevel=info
+message consume --  python celery_message_consume.py
