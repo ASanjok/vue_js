@@ -30,6 +30,14 @@ os.environ["GDAL_LIBRARY_PATH"] = GDAL_LIBRARY_PATH
 GEOS_LIBRARY_PATH = r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\geos_c.dll"
 os.environ["GEOS_LIBRARY_PATH"] = GEOS_LIBRARY_PATH
 ```
+and
+```sh
+'HOST': 'localhost',
+```
+and comment
+```sh
+'HOST': 'host.docker.internal',
+```
 
 move to dir django
 ```sh

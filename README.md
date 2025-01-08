@@ -9,6 +9,16 @@ os.environ["GDAL_LIBRARY_PATH"] = GDAL_LIBRARY_PATH
 
 GEOS_LIBRARY_PATH = r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\geos_c.dll"
 os.environ["GEOS_LIBRARY_PATH"] = GEOS_LIBRARY_PATH
+
+.
+.
+.
+
+'HOST': 'localhost',
+```
+and uncomment
+```sh
+'HOST': 'host.docker.internal',
 ```
 
 create a requirements file

@@ -13,57 +13,58 @@
 export default {
     data() {
         return {
-            message: null, 
+            message: null,
             data: {
                 queue: "to_django_requests",
                 message: "get_flight_data"
             },
-            socket: null, 
+            socketget: null,
+            socketsend: null,
         };
     },
     created() {
-        this.setupWebSocket(); 
+        this.setupWebSocket();
     },
     methods: {
-        
-        setupWebSocket() {
-            this.socket = new WebSocket('ws://localhost:8080'); 
 
-            this.socket.onopen = () => {
+        setupWebSocket() {
+            this.socketget = new WebSocket('ws://localhost:8081');
+
+            this.socketget.onopen = () => {
                 console.log('WebSocket connected');
             };
 
-            
-            this.socket.onmessage = (event) => {
+
+            this.socketget.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 console.log('Received data:', data);
-                this.message = data.message; 
+                this.message = data.message;
             };
 
-            this.socket.onerror = (error) => {
+            this.socketget.onerror = (error) => {
                 console.error('WebSocket error:', error);
             };
         },
 
-        
+
         sendMessage() {
-            fetch('http://localhost:3000/sendMessage', {
+            fetch('http://localhost:8081/sendMessage', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    queue: this.data.queue,
-                    message: this.data.message,
+                    queue: this.data.queue, // Имя очереди
+                    message: this.data.message, // Сообщение
                 }),
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Request sent:', data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Message sent:', data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         },
     },
 };
