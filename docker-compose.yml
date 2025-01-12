@@ -42,13 +42,14 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  vue_producer/consumer:
-    build:
-      context: ./vue_rabbitmq
-    container_name: vue_producer/consumer
-    ports:
-      - "8080:8080"
-    restart: always
+  # vue_producer/consumer:
+  #   build:
+  #     context: ./vue_rabbitmq
+  #   container_name: vue_producer/consumer
+  #   ports:
+  #     - "8080:8080"
+  #   restart: always
+  # !changed maybe need delete
 
 
 volumes:

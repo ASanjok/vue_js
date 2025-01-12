@@ -1,6 +1,7 @@
 from kombu import Connection, exceptions
 from queue import Empty 
-from first_part.tasks import process_message_from_rabbitmq 
+from first_part.tasks import process_message_from_rabbitmq
+
 
 def consume_messages_from_rabbitmq():
     with Connection('amqp://admin:Password1234@localhost:5672/') as conn:
