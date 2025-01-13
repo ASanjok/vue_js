@@ -55,7 +55,7 @@ app.post('/sendMessage', async (req, res) => {
 async function startConsuming() {
     if (channel && hasClients) {
         console.log("Starting to consume messages...");
-        channel.consume('to_django_requests', (msg) => {
+        channel.consume('to_django_data', (msg) => {
             if (msg !== null) {
                 console.log(" [x] Received %s", msg.content.toString());
 
@@ -95,7 +95,7 @@ amqp.connect('amqp://admin:Password1234@localhost:5672')
     .then(connection => connection.createChannel())
     .then(ch => {
         channel = ch;
-        return channel.assertQueue('to_django_requests', { durable: true });
+        return channel.assertQueue('to_django_data', { durable: true });
     })
     .then(() => {
         console.log("Connected to RabbitMQ, waiting for clients...");

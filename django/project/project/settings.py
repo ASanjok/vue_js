@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CELERY_BROKER_URL = 'amqp://admin:Password1234@localhost:5672' 
+CELERY_BROKER_URL = 'amqp://celery:celery@localhost:5672/' 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'rpc://' 

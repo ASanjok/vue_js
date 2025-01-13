@@ -4,16 +4,15 @@ from first_part.tasks import process_message_from_rabbitmq
 
 
 def consume_messages_from_rabbitmq():
-    with Connection('amqp://admin:Password1234@localhost:5672/') as conn:
+    with Connection('amqp://celery:celery@localhost:5672') as conn:
         print("Connected to RabbitMQ successfully")
-        queue = conn.SimpleQueue('to_django_requests')
+        queue = conn.SimpleQueue('to_django_data')
 
         while True:
             try:
                 message = queue.get(block=True, timeout=10)
                 print(f"Received message: {message.payload}")
 
-                process_message_from_rabbitmq.delay(message.payload)
 
                 message.ack()
 
@@ -22,6 +21,12 @@ def consume_messages_from_rabbitmq():
 
             except Exception as e:
                 print(f"Error processing message: {e}")
+
+            try:
+                
+                process_message_from_rabbitmq.delay(message.payload)
+            except Exception as e:
+                print(f"-------------------------: {e}")
 
 consume_messages_from_rabbitmq()
 
@@ -33,7 +38,7 @@ consume_messages_from_rabbitmq()
 # def consume_messages_from_rabbitmq():
 #     with Connection('amqp://admin:Password1234@localhost:5672') as conn:
 #         print("Connected to RabbitMQ successfully")
-#         queue = conn.SimpleQueue('to_django_requests')
+#         queue = conn.SimpleQueue('to_django_data')
 
 #         while True:
 #             try:

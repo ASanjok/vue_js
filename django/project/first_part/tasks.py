@@ -1,43 +1,10 @@
 from __future__ import absolute_import, unicode_literals
-import os
 from celery import shared_task
-from kombu import Connection, exceptions
 import json
 from collections import OrderedDict
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-# Настройка подключения к RabbitMQ
-RABBITMQ_URL = 'amqp://admin:Password1234@localhost:5672/'
-QUEUE_NAME = 'to_django_requests'
-
-
-# @shared_task
-# def consume_messages_from_rabbitmq():
-#     """
-#     Задача для потребления сообщений из RabbitMQ.
-#     """
-#     with Connection(RABBITMQ_URL) as conn:
-#         logger.info("Connected to RabbitMQ successfully")
-#         queue = conn.SimpleQueue(QUEUE_NAME)
-
-#         while True:
-#             try:
-#                 message = queue.get(block=True, timeout=10)
-#                 logger.info(f"Received message: {message.payload}")
-
-#                 # Передача сообщения на обработку
-#                 process_message_from_rabbitmq.delay(message.payload)
-#                 message.ack()
-
-#             except exceptions.Empty:
-#                 logger.info("Queue is empty, waiting for new messages...")
-
-#             except Exception as e:
-#                 logger.info(f"Error processing message: {e}")
-
 
 @shared_task
 def process_message_from_rabbitmq(json_message):

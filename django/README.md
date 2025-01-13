@@ -89,3 +89,12 @@ password - 1234
 in project dir
 celery - celery -A project worker --loglevel=info
 message consume --  python celery_message_consume.py
+
+
+
+
+(env) PS C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\project> python .\manage.py runserver
+(env) PS C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\project> python.exe .\celery_message_consume.py
+(env) PS C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\project> celery -A project worker --loglevel=info --pool=solo
+PS C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\message_receiver> node .\receiver.js
+PS C:\Users\aleksandrs.sloka\Desktop\data_sender_tester> node .\data_sender_tester.js

@@ -2,17 +2,17 @@ from django.contrib.gis.db import models
 
 
 class PositionData(models.Model):
-    position = models.PointField(geography=True) 
-    altitude = models.FloatField()
+    position = models.PointField(geography=True,null=True) 
+    altitude = models.FloatField(null=True)
     speed = models.FloatField(null=True)
-    track = models.FloatField()
-    rc = models.FloatField(blank=True)
-    epu = models.FloatField(blank=True)
-    vepu = models.FloatField(blank=True)
-    hfomr = models.FloatField(blank=True)
-    vfomr = models.FloatField(blank=True)
+    track = models.FloatField(null=True)
+    rc = models.FloatField(blank=True,null=True)
+    epu = models.FloatField(blank=True,null=True)
+    vepu = models.FloatField(blank=True,null=True)
+    hfomr = models.FloatField(blank=True,null=True)
+    vfomr = models.FloatField(blank=True,null=True)
     hex_code = models.CharField(blank=True, unique=True)
-    icao_id = models.CharField(max_length=10)
+    icao_id = models.CharField(max_length=10,null=True)
     call_sign = models.CharField(max_length=20, blank=True, null=True)
 
     
@@ -22,8 +22,8 @@ class PositionData(models.Model):
 
 
 class Place(models.Model):
-    place_name = models.CharField(max_length=100)
-    time_received = models.DateTimeField()
+    place_name = models.CharField(max_length=100,null=True)
+    time_received = models.DateTimeField(null=True)
     plane_distance = models.FloatField(blank=True, null=True)
     
     PositionData = models.ForeignKey(PositionData, on_delete=models.DO_NOTHING, related_name="positionData", blank=True)
