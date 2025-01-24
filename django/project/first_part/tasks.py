@@ -13,6 +13,7 @@ def process_message_from_rabbitmq(json_message):
     """
     Обработка сообщения из RabbitMQ.
     """
+    logger.info(f"-----------------------------------------------------")
     logger.info(f"Processing message: {json_message}")
 
     try:

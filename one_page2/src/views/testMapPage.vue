@@ -56,7 +56,6 @@ export default {
                     console.log(`Plane with callSign ${data.Callsign} already exists.`);
                     this.planeCollection[data.Callsign].updatePosition(data.Position_longitude, data.Position_latitude, data.direction);
                 } else {
-                    // Создаём новый объект Plane и добавляем в коллекцию
                     this.planeCollection[data.Callsign] = new Plane(
                         data.Position_longitude,
                         data.Position_latitude,
@@ -176,6 +175,8 @@ class Plane {
                 ],
             });
         }
+        
+        //------------------------------------------------------------------------------------------------------
 
         this.map.on('click', this.layerId, (e) => {
             const features = this.map.queryRenderedFeatures(e.point, {
@@ -184,11 +185,9 @@ class Plane {
 
             if (features.length > 0) {
                 const feature = features[0];
-                // Выводим сообщение при клике
                 console.log(`You clicked on plane with call sign: ${this.callSign}`);
             }
         });
-        //------------------------------------------------------------------------------------------------------
         this.resetDeleteTimer();
     }
 

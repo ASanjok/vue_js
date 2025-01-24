@@ -18,12 +18,13 @@ def consume_messages_from_rabbitmq():
 
             except Empty:
                 print("Queue is empty, waiting for new messages...")
+                continue
 
             except Exception as e:
                 print(f"Error processing message: {e}")
+                continue
 
             try:
-                
                 process_message_from_rabbitmq.delay(message.payload)
             except Exception as e:
                 print(f"-------------------------: {e}")
