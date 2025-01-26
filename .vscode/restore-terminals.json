@@ -1,0 +1,83 @@
+{
+    "artificialDelayMilliseconds": 700,
+    "keepExistingTerminalsOpen": false,
+    "runOnStartup": true,
+    "terminals": [
+        {
+            "splitTerminals": [
+                {
+                    "name": "django",
+                    "commands": [
+                        "cd django",
+                        "env/scripts/activate",
+                        "cd project",
+                        "python manage.py runserver"
+                    ],
+                    "shouldRunCommands": false
+                }
+            ]
+        },
+        {
+            "splitTerminals": [
+                {
+                    "name": "celery",
+                    "commands": [
+                        "cd django",
+                        "env/scripts/activate",
+                        "cd project",
+                        "celery -A project worker --loglevel=info --pool=solo"
+                    ],
+                    "shouldRunCommands": false
+                },
+                {
+                    "name": "message_consume_to_celery",
+                    "commands": [
+                        "cd django",
+                        "env/scripts/activate",
+                        "cd project",
+                        "python celery_message_consume.py"
+                    ],
+                    "shouldRunCommands": false
+                }
+            ]
+        },
+        {
+            "splitTerminals": [
+                {
+                    "name": "message_receiver",
+                    "commands": [
+                        "cd message_receiver",
+                        "node receiver"
+                    ],
+                    "shouldRunCommands": false
+                }
+            ]
+        },
+        {
+            "splitTerminals": [
+                {
+                "name": "data_sender_tester",
+                    "commands": [
+                        "cd..",
+                        "cd..",
+                        "cd data_sender_tester",
+                        "node data_sender_tester.js"
+                    ],
+                    "shouldRunCommands": false
+                }
+            ]
+        },
+        {
+            "splitTerminals": [
+                {
+                "name": "vue",
+                    "commands": [
+                        "cd one_page2",
+                        "npm run serve"
+                    ],
+                    "shouldRunCommands": false
+                }
+            ]
+        }
+    ]
+}

@@ -55,7 +55,6 @@ async function sendMessageToVue(message) {
                     Position_latitude: message.Position_latitude,
                     Position_longitude: message.Position_longitude,
                     Callsign: message.Callsign,
-                    Hex: message.HEX,
                     direction: message.Track
                 };
                 client.send(JSON.stringify(filteredMessage));

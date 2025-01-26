@@ -31,8 +31,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
 app = Celery('project')
 
 # Настройки для отладки (1 поток и использование solo pool)
-app.conf.worker_concurrency = 2
-app.conf.pool = 'solo'
+# app.conf.worker_concurrency = 10
+# app.conf.pool = 'gevent'
 
 # Загрузка конфигурации Celery из settings.py
 app.config_from_object('django.conf:settings', namespace='CELERY')
