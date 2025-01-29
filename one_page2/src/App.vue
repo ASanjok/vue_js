@@ -1,15 +1,39 @@
 <template>
   <div id="app">
     <div>
-      <b-navbar type="dark" variant="info">
-        <b-navbar-brand to="/">A. Sloka</b-navbar-brand>
-        <b-navbar-nav class="d-flex mx-auto justify-content-center">
-          <b-nav-item to="/firstPage">First Page</b-nav-item>
-          <b-nav-item to="/secondPage">Second Page</b-nav-item>
+      <!-- Conditional rendering of the navbar, it will only show if not on the login or registration page -->
+      <b-navbar type="dark" variant="info" v-if="showNavbar">
+        <b-navbar-brand to="/">Lidmasinas Karte</b-navbar-brand>
+
+
+        <b-navbar-nav class="ml-auto">
+          <b-nav-item-dropdown text="Account" right>
+            <b-dropdown-item to="/account">View account information</b-dropdown-item>
+            <b-dropdown-item @click="logout">Log out</b-dropdown-item>
+          </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-navbar>
     </div>
 
-    <router-view /> <!-- here show what route return -->
+    <router-view />
   </div>
 </template>
+
+<script>
+export default {
+  computed: {
+    // Check which page the user is on
+    showNavbar() {
+      // Hide the navbar on the login and registration pages
+      return !['/login', '/register'].includes(this.$route.path);
+    }
+  },
+  methods: {
+    logout() {
+      console.log('Logging out...');
+      localStorage.removeItem('authToken');
+      this.$router.push('/login');
+    }
+  }
+};
+</script>

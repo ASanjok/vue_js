@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -54,6 +56,29 @@ INSTALLED_APPS = [
     "debug_toolbar",
     'django.contrib.gis',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=2),  # Время жизни токена доступа
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Время жизни токена обновления
+#     'ROTATE_REFRESH_TOKENS': True,                  # Обновлять токен обновления при каждом его использовании
+#     'BLACKLIST_AFTER_ROTATION': True                # Отзыв старого токена после его использования
+# }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=2),  # Время жизни токена доступа
+    # Удаляем REFRESH_TOKEN_LIFETIME, так как не используем refresh токен
+    'ROTATE_REFRESH_TOKENS': False,                  # Не обновлять refresh токен
+    'BLACKLIST_AFTER_ROTATION': False
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

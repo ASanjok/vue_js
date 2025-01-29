@@ -13,20 +13,20 @@ let channel; // Переменная для хранения канала
 
 // Инициализация подключения и канала RabbitMQ
 async function initializeRabbitMQ() {
-    try {
-        const connection = await amqp.connect(RABBITMQ_URL);
-        channel = await connection.createChannel();
+    // try {
+    //     const connection = await amqp.connect(RABBITMQ_URL);
+    //     channel = await connection.createChannel();
 
-        // Убедимся, что очередь существует
-        await channel.assertQueue(QUEUE_NAME, {
-            durable: true, // Очередь устойчивая
-        });
+    //     // Убедимся, что очередь существует
+    //     await channel.assertQueue(QUEUE_NAME, {
+    //         durable: true, // Очередь устойчивая
+    //     });
 
-        console.log('RabbitMQ connection and channel initialized.');
-    } catch (error) {
-        console.error('Failed to initialize RabbitMQ:', error);
-        process.exit(1); // Завершаем процесс, если RabbitMQ недоступен
-    }
+    //     console.log('RabbitMQ connection and channel initialized.');
+    // } catch (error) {
+    //     console.error('Failed to initialize RabbitMQ:', error);
+    //     process.exit(1); // Завершаем процесс, если RabbitMQ недоступен
+    // }
 }
 
 // Функция для отправки сообщения

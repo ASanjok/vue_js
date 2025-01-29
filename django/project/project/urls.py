@@ -15,13 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import pathz
+from django.urls import path
 
 from debug_toolbar.toolbar import debug_toolbar_urls
 
-from first_part.views import PlaneDetailView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from first_part import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/plane/<str:callsign>/', PlaneDetailView.as_view())
+    path('api/plane/<str:callsign>/', views.PlaneDetailView.as_view()),
+    path('api/register/', views.RegisterView.as_view(), name='register'),
+    path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/previousePositions/<str:call_sign>/', views.PreviousePositionsView.as_view(), name='previouse_positions'),
+    path('api/account/', views.AccountInfoView.as_view(), name='account-info'),
 ] + debug_toolbar_urls()
