@@ -1,33 +1,33 @@
 services:
-  # django_backend:
-  #   build:
-  #     context: ./django/project
-  #   container_name: django_backend
-  #   ports:
-  #     - "8000:8000"
-  #   restart: always
-  #   environment:
-  #     - DEBUG=True
+  django_backend:
+    build:
+      context: ./django/project
+    container_name: django_backend
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      - DEBUG=True
 
-  # vue_frontend:
-  #   build:
-  #     context: ./one_page2
-  #   container_name: vue_frontend
-  #   ports:
-  #     - "80:80"
+  vue_frontend:
+    build:
+      context: ./one_page2
+    container_name: vue_frontend
+    ports:
+      - "80:80"
 
-      # db:
-      #   image: postgres:15
-      #   container_name: postgres
-      #   restart: always
-      #   environment:
-      #     POSTGRES_USER: admin
-      #     POSTGRES_PASSWORD: Password1234
-      #     POSTGRES_DB: flights_data_db
-      #   ports:
-      #     - "5432:5432"
-      #   volumes:
-      #     - db_data:/var/lib/postgresql/data
+  db:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: Password1234
+      POSTGRES_DB: flights_data_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -42,16 +42,6 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-
-  # vue_producer/consumer:
-  #   build:
-  #     context: ./vue_rabbitmq
-  #   container_name: vue_producer/consumer
-  #   ports:
-  #     - "8080:8080"
-  #   restart: always
-  #!changed maybe need delete
-
 
 volumes:
   db_data:

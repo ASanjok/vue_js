@@ -1,8 +1,5 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import testVuePageView from '../views/testVuePage.vue';
-import djangoAnimePageView from '../views/djangoAnimePage.vue';
-import startMapPageView from '../views/startMapPage.vue';
 import testMapPageView from '../views/testMapPage.vue';
 import LoginForm from '@/views/loginFormPage.vue';
 import RegisterForm from '@/views/registerFormPage.vue';
@@ -14,22 +11,7 @@ const isAuthenticated = () => !!localStorage.getItem('authToken');
 
 const routes = [
   {
-    path: '/',
-    component: startMapPageView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/firstPage',
-    component: testVuePageView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/secondPage',
-    component: djangoAnimePageView,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/1',
+    path: '/map',
     component: testMapPageView,
     meta: { requiresAuth: true }
   },
