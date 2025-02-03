@@ -6,14 +6,14 @@ class PositionData(models.Model):
     altitude = models.FloatField(null=True)
     speed = models.FloatField(null=True)
     track = models.FloatField(null=True)
-    rc = models.FloatField(blank=True,null=True)
-    epu = models.FloatField(blank=True,null=True)
-    vepu = models.FloatField(blank=True,null=True)
-    hfomr = models.FloatField(blank=True,null=True)
-    vfomr = models.FloatField(blank=True,null=True)
-    hex_code = models.CharField(blank=True, unique=True, )
+    rc = models.FloatField(null=True)
+    epu = models.FloatField(null=True)
+    vepu = models.FloatField(null=True)
+    hfomr = models.FloatField(null=True)
+    vfomr = models.FloatField(null=True)
+    hex_code = models.CharField(unique=True)
     icao_id = models.CharField(max_length=10,null=True)
-    call_sign = models.CharField(max_length=20, blank=True, null=True)
+    call_sign = models.CharField(max_length=20, null=True)
 
     class Meta:
         indexes = [
@@ -30,7 +30,7 @@ class Place(models.Model):
     time_received = models.DateTimeField(null=True)
     plane_distance = models.FloatField(blank=True, null=True)
     
-    PositionData = models.ForeignKey(PositionData, on_delete=models.DO_NOTHING, related_name="positionData", blank=True)
+    PositionData = models.ForeignKey(PositionData, on_delete=models.DO_NOTHING, related_name="positionData")
 
     class Meta:
         indexes = [

@@ -23,7 +23,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from first_part import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls), '''delete before end'''
     path('api/plane/<str:callsign>/', views.PlaneDetailView.as_view()),
     path('api/register/', views.RegisterView.as_view(), name='register'),
     path('api/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
