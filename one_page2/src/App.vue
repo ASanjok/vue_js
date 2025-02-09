@@ -3,7 +3,7 @@
     <div>
       <!-- Conditional rendering of the navbar, it will only show if not on the login or registration page -->
       <b-navbar type="dark" variant="info" v-if="showNavbar">
-        <b-navbar-brand to="/">Lidmasinas Karte</b-navbar-brand>
+        <b-navbar-brand to="/map">Lidmasinas Karte</b-navbar-brand>
 
 
         <b-navbar-nav class="ml-auto">

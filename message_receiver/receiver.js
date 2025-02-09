@@ -51,10 +51,23 @@ async function sendMessageToVue(message) {
         serverWS.clients.forEach((client) => {
             if (client.readyState === ws.OPEN) {
                 const filteredMessage = {
+                    RC: message.Rc,
+                    EPU: message.EPU,
+                    HEX_code: message.HEX,
+                    ICAO: message.ICAO,
+                    VEPU: message.VEPU,
+                    HFOMr: message.HFOMr,
+                    Speed: message.Speed,
+                    Track: message.Track, //been direction
+                    VFOMr: message.VFOMr,
+                    Altitude: message.Altitude,
+                    Callsign: message.Callsign,
+                    MlatTime: message.mlat_time,
+                    PlaceName: message.place_name,
+                    TimeReceived: message.time_received,
+                    PlaneDistance: message.Plane_distance,
                     Position_latitude: message.Position_latitude,
                     Position_longitude: message.Position_longitude,
-                    Callsign: message.Callsign,
-                    direction: message.Track
                 };
                 client.send(JSON.stringify(filteredMessage));
                 console.log('Message sent to WebSocket client:', filteredMessage);
@@ -75,7 +88,7 @@ app.post('/sendMessage', async (req, res) => {
         return res.status(400).send('"message" is required in request body.');
     }
 
-    await sendMessageToQueue(message);
+    // await sendMessageToQueue(message);
     await sendMessageToVue(message);
     res.send('Message sent to RabbitMQ.');
 });
@@ -83,5 +96,5 @@ app.post('/sendMessage', async (req, res) => {
 // Запуск сервера и RabbitMQ
 app.listen(3000, async () => {
     console.log('Server running on http://localhost:3000');
-    await initializeRabbitMQ(); // Инициализируем RabbitMQ при запуске
+    // await initializeRabbitMQ(); // Инициализируем RabbitMQ при запуске
 });

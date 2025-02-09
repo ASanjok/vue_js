@@ -42,10 +42,12 @@ export default {
             try {
                 const response = await axios.post('http://localhost:8000/api/login/', this.form);
                 const token = response.data.access;
+                const refreshtoken = response.data.refresh;
                 localStorage.setItem('authToken', token);
+                localStorage.setItem('refreshToken', refreshtoken)
 
                 // Перенаправление после успешного входа
-                this.$router.push('/');
+                this.$router.push('/map');
             } catch (err) {
                 this.error = 'Login failed. Please check your credentials.';
             }

@@ -18,6 +18,7 @@ from .serializers import PreviousePositionsSerializer
 from rest_framework.permissions import IsAuthenticated
 
 class PlaneDetailView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, callsign):
         try:
             # Найти последнюю запись по `call_sign`
@@ -34,6 +35,7 @@ class PlaneDetailView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class RegisterSerializer(ModelSerializer):
+    permission_classes = [AllowAny]
     class Meta:
         model = User
         fields = ('username', 'password', 'email')
@@ -57,22 +59,23 @@ class PreviousePositionsView(APIView):
         """
         Получить позиции самолета по call_sign за последние 5 минут.
         """
-        # current_time = now()
+        current_time = now()
         positions = PositionData.objects.filter(
             call_sign=call_sign,
-            position__isnull=False,
-            # positionData__time_received__gte=current_time - timedelta(minutes=5)  # Используем related_name
-        )
+            position__isnull=False,  # Исключаем записи без координат
+            # time_received__gte=current_time - timedelta(minutes=5)  # Записи за последние 5 минут
+        )# .order_by('-time_received')
 
         if not positions.exists():
             raise NotFound({"detail": f"Позиции для {call_sign} не найдены за последние 5 минут."})
 
         serializer = PreviousePositionsSerializer(positions, many=True)
         return Response({"call_sign": call_sign, "positions": serializer.data})
+    permission_classes = [AllowAny]
 
 
 class AccountInfoView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
         user = request.user

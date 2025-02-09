@@ -14,83 +14,112 @@ Vue.config.productionTip = false;
 // Axios interceptor for adding Authorization header
 axios.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken');
-  console.log('Intercepted request, adding token:', token); // Logging the token to the console
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 }, error => {
-  console.error('Request error:', error); // Logging the request error
+  console.error('Request error:', error);
   return Promise.reject(error);
 });
 
-// Function to track token expiration
-function trackTokenExpiration() {
-  const token = localStorage.getItem('authToken');
-  console.log('Tracking token expiration, token:', token); // Logging the token being tracked
+// Function to refresh token by making an API call
+// async function refreshToken() {
+//   try {
+//     const refreshToken = localStorage.getItem('refreshToken');
+//     if (refreshToken) {
+//       const response = await axios.post('http://localhost:8000/api/token/refresh/', {
+//         refreshToken: refreshToken,
+//       });
 
-  if (token) {
-    try {
-      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decoding the JWT payload
-      console.log('Decoded token:', decodedToken); // Logging the decoded token
-
-      const expirationTime = decodedToken.exp * 1000; // Token expiration time (in milliseconds)
-      const timeUntilExpiration = expirationTime - Date.now();
-      console.log('Token will expire in:', timeUntilExpiration, 'ms'); // Logging the time until token expiration
-
-      if (timeUntilExpiration > 0) {
-        // Notification 1 minute before expiration
-        setTimeout(() => {
-          console.log('Session is about to expire, showing toast notification'); // Logging before showing the notification
-          Vue.prototype.$toast.warning('Your session is about to expire soon.', {
-            timeout: false, // Notification does not disappear automatically
-          });
-        }, timeUntilExpiration - 60000); // 1 minute before expiration
-      } else {
-        console.log('Token has expired, logging out'); // Token has expired
-        logout();
-      }
-    } catch (err) {
-      console.error('Failed to decode token:', err); // Error decoding the token
-    }
-  } else {
-    console.log('No token found'); // No token present
-  }
-}
+//       if (response.data.accessToken) {
+//         localStorage.setItem('authToken', response.data.accessToken);
+//         console.log('Token refreshed successfully');
+//       }
+//     }
+//   } catch (error) {
+//     console.error('Failed to refresh token:', error);
+//     logout(); // Logout if refresh fails
+//   }
+// }
 
 // Logout logic
 function logout() {
-  console.log('Logging out...'); // Logging the logout message
+  console.log('Logging out...');
   localStorage.removeItem('authToken');
   router.push('/login');
 }
 
-// Wait for the token to exist before calling trackTokenExpiration
+// Track token expiration and refresh if necessary
+function trackTokenExpiration() {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    try {
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      const expirationTime = decodedToken.exp * 1000;
+      const timeUntilExpiration = expirationTime - Date.now();
+
+      console.log('Token will expire in:', timeUntilExpiration, 'ms');
+
+      // Show toast 30 seconds before token expires
+      if (timeUntilExpiration > 30000) {
+        setTimeout(() => {
+          Vue.prototype.$toast.warning('Your session is about to expire in 30 seconds.', {
+            timeout: true, // Notification does not disappear automatically
+          });
+        }, timeUntilExpiration - 30000); // 30 seconds before expiration
+        setTimeout(() => {
+          logout();
+
+          waitForTokenAndTrack();
+        }, timeUntilExpiration); // 30 seconds before expiration
+      }
+
+      // Logout if token is expired
+      if (timeUntilExpiration <= 0) {
+        logout();
+      }
+    } catch (err) {
+      console.error('Failed to decode token:', err);
+    }
+  }
+}
+
+// Wait for the token and start tracking
 function waitForTokenAndTrack() {
   const checkTokenInterval = setInterval(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      console.log('Token found, starting to track expiration...');
       trackTokenExpiration();
-      clearInterval(checkTokenInterval); // Stop checking once the token is found
-    } else {
-      console.log('No token found, waiting...');
+      clearInterval(checkTokenInterval);
     }
-  }, 1000); // Check every 1000 ms (1 second)
+  }, 1000); // Check every second
 }
+
+// Before each route, refresh token if necessary
+// router.beforeEach(async (to, from, next) => {
+//   const token = localStorage.getItem('authToken');
+
+//   if (token) {
+//     // Обновить токен и перезапустить отслеживание
+//     await refreshToken(); // Функция обновления токена
+//     trackTokenExpiration(); // Перезапустить отслеживание истечения
+//   }
+
+//   // next(); // Proceed with route change
+// });
 
 new Vue({
   router,
   store,
   render: h => h(App),
   mounted() {
-    console.log('App mounted, waiting for token...');
-    waitForTokenAndTrack(); // Start waiting for the token
+    waitForTokenAndTrack(); // Start checking for token when app is mounted
+    console.log('whatching for token');    
   }
 }).$mount('#App');
 
 Vue.use(Toast, {
-  // Notification settings
-  timeout: 50000, // Notification display time (50 seconds)
+  timeout: 30000, // Notification display time (50 seconds)
   position: 'top-right' // Notification position
 });
