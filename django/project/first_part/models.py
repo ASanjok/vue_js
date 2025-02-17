@@ -39,6 +39,6 @@ class Place(models.Model):
 
     def __str__(self):
         return f"{self.place_name} ({self.plane_distance} km)"
-
+    
 
 

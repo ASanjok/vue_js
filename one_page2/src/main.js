@@ -9,6 +9,15 @@ import axios from 'axios';
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 
+export default {
+  methods: {
+    // Function to refresh token by making an API call
+
+  }
+}
+
+
+
 Vue.config.productionTip = false;
 
 // Axios interceptor for adding Authorization header
@@ -23,26 +32,6 @@ axios.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
-// Function to refresh token by making an API call
-// async function refreshToken() {
-//   try {
-//     const refreshToken = localStorage.getItem('refreshToken');
-//     if (refreshToken) {
-//       const response = await axios.post('http://localhost:8000/api/token/refresh/', {
-//         refreshToken: refreshToken,
-//       });
-
-//       if (response.data.accessToken) {
-//         localStorage.setItem('authToken', response.data.accessToken);
-//         console.log('Token refreshed successfully');
-//       }
-//     }
-//   } catch (error) {
-//     console.error('Failed to refresh token:', error);
-//     logout(); // Logout if refresh fails
-//   }
-// }
-
 // Logout logic
 function logout() {
   console.log('Logging out...');
@@ -53,6 +42,7 @@ function logout() {
 // Track token expiration and refresh if necessary
 function trackTokenExpiration() {
   const token = localStorage.getItem('authToken');
+  console.log("in tracktokenexpiration")
   if (token) {
     try {
       const decodedToken = JSON.parse(atob(token.split('.')[1]));
@@ -62,18 +52,28 @@ function trackTokenExpiration() {
       console.log('Token will expire in:', timeUntilExpiration, 'ms');
 
       // Show toast 30 seconds before token expires
-      if (timeUntilExpiration > 30000) {
-        setTimeout(() => {
+
+      setTimeout(() => {
+        if (token == localStorage.getItem('authToken')) {
           Vue.prototype.$toast.warning('Your session is about to expire in 30 seconds.', {
             timeout: true, // Notification does not disappear automatically
           });
-        }, timeUntilExpiration - 30000); // 30 seconds before expiration
-        setTimeout(() => {
+        } else {
+          trackTokenExpiration();
+          return;
+        }
+      }, timeUntilExpiration - 30000); // 30 seconds before expiration
+      setTimeout(() => {
+        if (token == localStorage.getItem('authToken')) {
           logout();
 
           waitForTokenAndTrack();
-        }, timeUntilExpiration); // 30 seconds before expiration
-      }
+        } else {
+          trackTokenExpiration();
+          return;
+        }
+      }, timeUntilExpiration);
+
 
       // Logout if token is expired
       if (timeUntilExpiration <= 0) {
@@ -88,6 +88,7 @@ function trackTokenExpiration() {
 // Wait for the token and start tracking
 function waitForTokenAndTrack() {
   const checkTokenInterval = setInterval(() => {
+    console.log('whatching for token');
     const token = localStorage.getItem('authToken');
     if (token) {
       trackTokenExpiration();
@@ -115,7 +116,6 @@ new Vue({
   render: h => h(App),
   mounted() {
     waitForTokenAndTrack(); // Start checking for token when app is mounted
-    console.log('whatching for token');    
   }
 }).$mount('#App');
 

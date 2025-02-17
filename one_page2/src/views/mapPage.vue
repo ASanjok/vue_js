@@ -6,7 +6,7 @@
             text-variant="dark" left style="width: 180px; ">
             <template v-if="sidebarData">
                 <b-card class="mb-2" header="header" header-bg-variant="primary" header-text-variant="white">
-                    <b-table striped hover small :items="formattedSidebarData" :fields="tableFields"
+                        <b-table striped hover small :items="formattedSidebarData" :fields="tableFields"
                         responsive="sm"></b-table>
                 </b-card>
             </template>
@@ -26,6 +26,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as turf from 'turf';
 import { onBeforeUnmount } from 'vue';
+import axios from 'axios';
 // import { ref } from 'vue';
 
 export default {
@@ -124,6 +125,26 @@ export default {
         }
     },
     methods: {
+        async refreshToken() {
+            try {
+                const refreshToken = localStorage.getItem('refreshToken');
+                console.log("refresh token used - ", refreshToken)
+                if (refreshToken) {
+                    const response = await axios.post('http://localhost:8000/api/token/refresh/', {
+                        refresh: refreshToken,
+                    });
+
+                    if (response.data.access) {
+                        localStorage.setItem('authToken', response.data.access);
+                        console.log('Token refreshed successfully, new access token - ', response.data.access);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to refresh token:', error);
+                // logout(); // Logout if refresh fails
+            }
+        },
+
         removePlaneFromCollection(callSign) {
             this.$delete(this.planeCollection, callSign);
         },
@@ -160,9 +181,10 @@ export default {
                     );
                     console.log(`Plane ${data.Callsign} added to collection.`);
 
-                    if (this.isSidebarVisible && this.sidebarCallSign === data.Callsign) {
-                        this.sidebarData = data;
-                    }
+
+                }
+                if (this.isSidebarVisible && this.sidebarCallSign === data.Callsign) {
+                    this.sidebarData = data;
                 }
             };
 
@@ -171,26 +193,10 @@ export default {
             };
         },
 
-        // toggleSidebar(CallSign = null) {
-        //     if (CallSign == null) {
-        //         this.isSidebarVisible = false;
-        //         this.sidebarCallSign = null;
-        //         this.sidebarData = null;
-        //     } else {
-        //         this.isSidebarVisible = true;
-        //         this.sidebarCallSign = CallSign;
-
-        //         // Если самолёт уже есть в коллекции, обновляем sidebarData
-        //         if (CallSign && this.planeCollection[CallSign]) {
-        //             this.sidebarData = this.planeCollection[CallSign].sidebarData;
-        //         }
-        //     }
-        // },
-
-
 
 
         toggleSidebar(CallSign = null) {
+            this.refreshToken();
             if (CallSign == null) {
                 this.isSidebarVisible = false;
                 this.sidebarCallSign = null;
@@ -200,8 +206,11 @@ export default {
                 this.sidebarCallSign = CallSign;
 
                 // Если самолет есть в коллекции, обновляем sidebarData
+                console.log("sidebar open )))))", this.planeCollection[CallSign])
                 if (this.planeCollection[CallSign]) {
-                    this.sidebarData = { ...this.planeCollection[CallSign].sidebarData };
+                    // this.sidebarData = this.planeCollection[CallSign].sidebarData;
+                    this.sidebarData = { longitude: this.planeCollection[CallSign].longitude, latitude: this.planeCollection[CallSign].latitude, callSign: this.planeCollection[CallSign].callSign }
+                    console.log("((()))", this.sidebarData)
                 }
             }
         },

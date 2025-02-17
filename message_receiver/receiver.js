@@ -6,7 +6,7 @@ const serverWS = new ws.Server({ port: 8082 });;
 
 app.use(express.json()); // Для обработки текстового тела запроса
 
-const RABBITMQ_URL = 'amqp://admin:Password1234@localhost:5672';
+const RABBITMQ_URL = 'amqp://admin:Password1234@rabbitmq:5672';
 const QUEUE_NAME = 'to_django_data';
 
 let channel; // Переменная для хранения канала
@@ -88,7 +88,7 @@ app.post('/sendMessage', async (req, res) => {
         return res.status(400).send('"message" is required in request body.');
     }
 
-    // await sendMessageToQueue(message);
+    await sendMessageToQueue(message);
     await sendMessageToVue(message);
     res.send('Message sent to RabbitMQ.');
 });
@@ -96,5 +96,5 @@ app.post('/sendMessage', async (req, res) => {
 // Запуск сервера и RabbitMQ
 app.listen(3000, async () => {
     console.log('Server running on http://localhost:3000');
-    // await initializeRabbitMQ(); // Инициализируем RabbitMQ при запуске
+    await initializeRabbitMQ(); // Инициализируем RabbitMQ при запуске
 });

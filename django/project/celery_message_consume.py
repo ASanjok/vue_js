@@ -4,7 +4,7 @@ from first_part.tasks import process_message_from_rabbitmq
 
 
 def consume_messages_from_rabbitmq():
-    with Connection('amqp://celery:celery@localhost:5672') as conn:
+    with Connection('amqp://celery:celery@rabbitmq:5672') as conn:
         print("Connected to RabbitMQ successfully")
         queue = conn.SimpleQueue('to_django_data')
 

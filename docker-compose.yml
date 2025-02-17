@@ -1,47 +1,73 @@
 services:
-#   django_backend:
-#     build:
-#       context: ./django/project
-#     container_name: django_backend
-#     ports:
-#       - "8000:8000"
-#     restart: always
-#     environment:
-#       - DEBUG=True
+  django_backend:
+    build:
+      context: ./django/project  # Контекст сборки - папка с Django
+    container_name: django_backend
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      - DEBUG=True
+      - CELERY_BROKER_URL=amqp://admin:Password1234@rabbitmq:5672/
+    depends_on:
+      - db
+      - rabbitmq
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
-#   vue_frontend:
-#     build:
-#       context: ./one_page2
-#     container_name: vue_frontend
-#     ports:
-#       - "80:80"
+  vue_frontend:
+    build:
+      context: ./one_page2
+    container_name: vue_frontend
+    ports:
+      - "80:80"
 
-#   db:
-#     image: postgres:15
-#     container_name: postgres
-#     restart: always
-#     environment:
-#       POSTGRES_USER: postgres
-#       POSTGRES_PASSWORD: Password1234
-#       POSTGRES_DB: flights_data_db
-#     ports:
-#       - "5432:5432"
-#     volumes:
-#       - db_data:/var/lib/postgresql/data
+  db:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Password1234
+      POSTGRES_DB: flights_data_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     restart: always
     environment:
-      RABBITMQ_DEFAULT_USER: Admin
+      RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: Password1234
-      RABBITMQ_DEFAULT_MECHANISMS: PLAIN
+      RABBITMQ_DEFAULT_VHOST: /
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+
+  celery_worker:
+    build:
+      context: ./django/project  # Тот же контекст, что и Django
+    container_name: celery_worker
+    restart: always
+    environment:
+      - CELERY_BROKER_URL=amqp://admin:Password1234@rabbitmq:5672/
+    command: celery -A project worker --loglevel=info
+    depends_on:
+      - django_backend
+      - rabbitmq
+
+  receiver: 
+    build:
+      context: ./message_receiver
+    container_name: message_receiver
+    restart: always
+    ports:
+      - "3000:3000"
 
 volumes:
   db_data:

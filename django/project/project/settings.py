@@ -35,11 +35,11 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_BACKEND = 'rpc://' 
 
-GDAL_LIBRARY_PATH = r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\gdal303.dll"
-os.environ["GDAL_LIBRARY_PATH"] = GDAL_LIBRARY_PATH
+# GDAL_LIBRARY_PATH = r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\gdal303.dll"
+# os.environ["GDAL_LIBRARY_PATH"] = GDAL_LIBRARY_PATH
 
-GEOS_LIBRARY_PATH = r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\geos_c.dll"
-os.environ["GEOS_LIBRARY_PATH"] = GEOS_LIBRARY_PATH
+# GEOS_LIBRARY_PATH = r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\geos_c.dll"
+# os.environ["GEOS_LIBRARY_PATH"] = GEOS_LIBRARY_PATH
 
 # Application definition
 
@@ -67,7 +67,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20),  # Время жизни токена доступа
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=2),  # Время жизни токена доступа
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # Время жизни токена обновления
     'ROTATE_REFRESH_TOKENS': True,                  # Обновлять токен обновления при каждом его использовании
     'BLACKLIST_AFTER_ROTATION': True                # Отзыв старого токена после его использования
@@ -128,8 +128,8 @@ DATABASES = {
         'NAME': 'flights_data_db',
         'USER': 'postgres',
         'PASSWORD': 'Password1234',
-        # 'HOST': 'host.docker.internal',
-        'HOST': 'localhost',
+        'HOST': 'host.docker.internal',
+        # 'HOST': 'localhost',
         'PORT': '5432',     
     }
 }

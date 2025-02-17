@@ -74,8 +74,14 @@ class PreviousePositionsView(APIView):
     permission_classes = [AllowAny]
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from django.contrib.auth.models import User
+
 class AccountInfoView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]  # Доступ только для авторизованных пользователей
 
     def get(self, request):
         user = request.user
@@ -86,3 +92,24 @@ class AccountInfoView(APIView):
             "last_name": user.last_name,
         }
         return Response(data)
+
+    def put(self, request):
+        """Обновление данных пользователя"""
+        user = request.user
+        user.first_name = request.data.get("first_name", user.first_name)
+        user.last_name = request.data.get("last_name", user.last_name)
+        user.email = request.data.get("email", user.email)
+        user.save()
+        return Response(
+            {"message": "Данные обновлены успешно."},
+            status=status.HTTP_200_OK,
+        )
+
+    def delete(self, request):
+        """Удаление аккаунта пользователя"""
+        user = request.user
+        user.delete()
+        return Response(
+            {"message": "Аккаунт успешно удалён."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
