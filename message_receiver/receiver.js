@@ -2,7 +2,7 @@ const amqp = require('amqplib');
 const express = require('express');
 const ws = require('ws');
 const app = express();
-const serverWS = new ws.Server({ port: 8082 });; 
+const serverWS = new ws.Server({ port: 8082, host: '0.0.0.0' });; 
 
 app.use(express.json()); // Для обработки текстового тела запроса
 

@@ -68,6 +68,7 @@ services:
     restart: always
     ports:
       - "3000:3000"
+      - "8082:8082"
 
 volumes:
   db_data:
