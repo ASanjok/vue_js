@@ -1,26 +1,26 @@
 <template>
     <div class="d-flex justify-content-center align-items-center" style="height: 100vh; background-color: #f8f9fa;">
         <b-card class="p-4" style="width: 400px;">
-            <h4 class="text-center mb-4">Register</h4>
+            <h4 class="text-center mb-4">Reģistracija</h4>
             <form @submit.prevent="register">
-                <b-form-group label="Username" label-for="username">
+                <b-form-group label="Lietotājvārds" label-for="lietotājvārds">
                     <b-form-input v-model="form.username" type="text" id="username" required></b-form-input>
                 </b-form-group>
 
-                <b-form-group label="Email" label-for="email">
+                <b-form-group label="E-pasts" label-for="e-pasts">
                     <b-form-input v-model="form.email" type="email" id="email" required></b-form-input>
                 </b-form-group>
 
-                <b-form-group label="Password" label-for="password">
+                <b-form-group label="Parole" label-for="parole">
                     <b-form-input v-model="form.password" type="password" id="password" required></b-form-input>
                 </b-form-group>
 
-                <b-button type="submit" variant="primary" block>Register</b-button>
+                <b-button type="submit" variant="primary" block>Reģistrēties</b-button>
             </form>
 
             <div class="mt-3 text-center">
-                <p>Already have an account?</p>
-                <b-button variant="link" @click="goToLogin">Login</b-button>
+                <p>Jau ir konts?</p>
+                <b-button variant="link" @click="goToLogin">Pieteikties</b-button>
             </div>
 
             <p v-if="error" class="text-danger text-center mt-3">{{ error }}</p>

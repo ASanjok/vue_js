@@ -12,8 +12,8 @@
                         </b-col>
                     </b-row>
                     
-                    <b-button variant="primary" class="mt-3" @click="showEditModal = true">Редактировать</b-button>
-                    <b-button variant="danger" class="mt-3 ml-2" @click="showDeleteModal = true">Удалить</b-button>
+                    <b-button variant="primary" class="mt-3" @click="showEditModal = true">rediģet</b-button>
+                    <b-button variant="danger" class="mt-3 ml-2" @click="showDeleteModal = true">dzest</b-button>
                 </div>
                 <div v-else>
                     <b-alert variant="info" show>
@@ -24,27 +24,27 @@
         </b-card>
         
         <!-- Модальное окно редактирования -->
-        <b-modal v-model="showEditModal" title="Редактирование аккаунта" hide-footer>
+        <b-modal v-model="showEditModal" title="rediģet kontu" hide-footer>
             <b-form @submit.prevent="updateAccount">
-                <b-form-group label="Имя">
+                <b-form-group label="vards">
                     <b-form-input v-model="editData.first_name"></b-form-input>
                 </b-form-group>
-                <b-form-group label="Фамилия">
+                <b-form-group label="uzvards">
                     <b-form-input v-model="editData.last_name"></b-form-input>
                 </b-form-group>
                 <b-form-group label="Email">
                     <b-form-input type="email" v-model="editData.email"></b-form-input>
                 </b-form-group>
-                <b-button type="submit" variant="success">Сохранить</b-button>
-                <b-button variant="secondary" class="ml-2" @click="showEditForm = false">Отмена</b-button>
+                <b-button type="submit" variant="success">saglabat</b-button>
+                <b-button variant="secondary" class="ml-2" @click="showEditForm = false">atcelt</b-button>
             </b-form>
         </b-modal>
         
         <!-- Модальное окно подтверждения удаления -->
         <b-modal v-model="showDeleteModal" title="Удаление аккаунта" hide-footer>
-            <p>Вы уверены, что хотите удалить свой аккаунт? Это действие необратимо.</p>
-            <b-button variant="danger" @click="deleteAccount">Удалить</b-button>
-            <b-button variant="secondary" class="ml-2" @click="showDeleteModal = false">Отмена</b-button>
+            <p>jus parliecinati ka gribat dzest savu kontu?</p>
+            <b-button variant="danger" @click="deleteAccount">dzest</b-button>
+            <b-button variant="secondary" class="ml-2" @click="showDeleteModal = false">atcelt</b-button>
         </b-modal>
     </div>
 </template>
