@@ -166,7 +166,7 @@ export default {
                 console.log('Received plane:', data);
                 // const position = [data.Position_latitude, data.Position_longitude];
 
-                if (this.planeCollection[data.Callsign]) {65
+                if (this.planeCollection[data.Callsign]) {
                     console.log(`Plane with callSign ${data.Callsign} already exists.`);
                     this.planeCollection[data.Callsign].updatePosition(data);
                 } else {
