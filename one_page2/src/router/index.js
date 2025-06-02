@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import testMapPageView from '../views/testMapPage.vue';
+
 import MapPageView from '@/views/mapPage.vue';
 import LoginForm from '@/views/loginFormPage.vue';
 import RegisterForm from '@/views/registerFormPage.vue';
