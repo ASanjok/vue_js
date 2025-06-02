@@ -128,7 +128,7 @@ DATABASES = {
         'NAME': 'flights_data_db',
         'USER': 'postgres',
         'PASSWORD': 'Password1234',
-        'HOST': 'db',
+        'HOST': 'db', # test comment
         'HOST': 'localhost',
         'PORT': '5432',     
     }
