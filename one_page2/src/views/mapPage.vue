@@ -46,18 +46,6 @@ export default {
         };
     },
     computed: {
-        // formattedSidebarData() {
-        //     if (!this.sidebarData) return [];
-        //     return Object.keys(this.sidebarData).map(key => ({
-        //         key,
-        //         value: this.sidebarData[key],
-        //     }));
-        // },
-
-
-
-
-
         formattedSidebarData() {
             if (!this.sidebarData || Object.keys(this.sidebarData).length === 0) {
                 return [];
