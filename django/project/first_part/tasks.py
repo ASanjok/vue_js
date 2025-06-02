@@ -17,9 +17,9 @@ BATCH_SIZE = 50
 def process_message_from_rabbitmq(json_message):
     from django.contrib.gis.geos import Point
     from .models import PositionData, Place
-    """
-    Processes a message from RabbitMQ by accumulating data for batch saving.
-    """
+    # """
+    # Processes a message from RabbitMQ by accumulating data for batch saving.
+    # """
     global position_data_buffer, place_buffer
 
     try:
@@ -70,9 +70,9 @@ def process_message_from_rabbitmq(json_message):
 def save_buffers_to_database():
     from django.contrib.gis.geos import Point
     from .models import PositionData, Place
-    """
-    Saves accumulated data from buffers to the database.
-    """
+    # """
+    # Saves accumulated data from buffers to the database.
+    # """
     global position_data_buffer, place_buffer
 
     try:

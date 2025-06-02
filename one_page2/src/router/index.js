@@ -29,11 +29,6 @@ const routes = [
     component: AccountPageView,
     meta: {requiresAuth: true}
   },
-  {
-    
-    path: '/1',
-    component: testMapPageView,
-  }
 ];
 
 const router = new VueRouter({
