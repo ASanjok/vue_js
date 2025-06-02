@@ -1,7 +1,7 @@
 services:
   django_backend:
     build:
-      context: ./django/project  # Контекст сборки - папка с Django
+      context: ./django/project # Контекст сборки - папка с Django
     container_name: django_backend
     ports:
       - "8000:8000"
@@ -12,8 +12,6 @@ services:
     depends_on:
       - db
       - rabbitmq
-    command: >
-      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
   vue_frontend:
     build:
@@ -23,7 +21,7 @@ services:
       - "80:80"
 
   db:
-    image: postgres:15
+    image: postgis/postgis:15-3.5
     container_name: postgres
     restart: always
     environment:
@@ -34,6 +32,7 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      # - ./init-scripts:/docker-entrypoint-initdb.d # ⬅️ вот это добавь
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -49,19 +48,19 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  celery_worker:
-    build:
-      context: ./django/project  # Тот же контекст, что и Django
-    container_name: celery_worker
-    restart: always
-    environment:
-      - CELERY_BROKER_URL=amqp://admin:Password1234@rabbitmq:5672/
-    command: celery -A project worker --loglevel=info
-    depends_on:
-      - django_backend
-      - rabbitmq
+  # celery_worker:
+  #   build:
+  #     context: ./django/project # Тот же контекст, что и Django
+  #   container_name: celery_worker
+  #   restart: always
+  #   environment:
+  #     - CELERY_BROKER_URL=amqp://admin:Password1234@rabbitmq:5672/
+  #   command: celery -A project worker --loglevel=info
+  #   depends_on:
+  #     - django_backend
+  #     - rabbitmq
 
-  receiver: 
+  receiver:
     build:
       context: ./message_receiver
     container_name: message_receiver

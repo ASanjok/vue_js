@@ -128,7 +128,7 @@ DATABASES = {
         'NAME': 'flights_data_db',
         'USER': 'postgres',
         'PASSWORD': 'Password1234',
-        'HOST': 'host.docker.internal',
+        'HOST': 'db',
         # 'HOST': 'localhost',
         'PORT': '5432',     
     }

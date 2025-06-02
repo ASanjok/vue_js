@@ -1,29 +1,29 @@
 from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 # Загрузка переменных окружения из файла .env (если он используется)
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+# dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+# if os.path.exists(dotenv_path):
+#     load_dotenv(dotenv_path)
 
 # Установка путей для GDAL и GEOS
-os.environ.setdefault(
-    "GDAL_LIBRARY_PATH",
-    os.getenv(
-        "GDAL_LIBRARY_PATH",
-        r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\gdal303.dll"
-    )
-)
+# os.environ.setdefault(
+#     "GDAL_LIBRARY_PATH",
+#     os.getenv(
+#         "GDAL_LIBRARY_PATH",
+#         r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\gdal303.dll"
+#     )
+# )
 
-os.environ.setdefault(
-    "GEOS_LIBRARY_PATH",
-    os.getenv(
-        "GEOS_LIBRARY_PATH",
-        r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\geos_c.dll"
-    )
-)
+# os.environ.setdefault(
+#     "GEOS_LIBRARY_PATH",
+#     os.getenv(
+#         "GEOS_LIBRARY_PATH",
+#         r"C:\Users\aleksandrs.sloka\Desktop\vs_codes\vue_js\django\env\Lib\site-packages\osgeo\geos_c.dll"
+#     )
+# )
 
 # Настройка Django для Celery
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
