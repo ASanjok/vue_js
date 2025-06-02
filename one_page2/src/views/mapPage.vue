@@ -6,7 +6,7 @@
             text-variant="dark" left style="width: 180px; ">
             <template v-if="sidebarData">
                 <b-card class="mb-2" header="header" header-bg-variant="primary" header-text-variant="white">
-                        <b-table striped hover small :items="formattedSidebarData" :fields="tableFields"
+                    <b-table striped hover small :items="formattedSidebarData" :fields="tableFields"
                         responsive="sm"></b-table>
                 </b-card>
             </template>
@@ -24,8 +24,6 @@
 /* eslint-disable */
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import * as turf from 'turf';
-import { onBeforeUnmount } from 'vue';
 import axios from 'axios';
 // import { ref } from 'vue';
 
