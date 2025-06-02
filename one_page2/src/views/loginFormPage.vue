@@ -13,7 +13,7 @@
 
                 <b-button type="submit" variant="primary" block>Login</b-button>
             </form>
-
+-----------------------------------
             <div class="mt-3 text-center">
                 <p>Don't have an account?</p>
                 <b-button variant="link" @click="goToRegister">Register</b-button>
