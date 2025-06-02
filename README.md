@@ -41,6 +41,5 @@ docker-compose build
 docker-compose up
 ```
 
-main branch cleaning
 
 main branch cleaning
