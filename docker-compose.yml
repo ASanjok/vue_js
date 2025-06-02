@@ -27,7 +27,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Password1234
-      POSTGRES_DB: flights_data_db
+      # POSTGRES_DB: flights_data_db
     ports:
       - "5432:5432"
     volumes:
