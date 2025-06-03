@@ -55,6 +55,13 @@ export default {
             }
         },
     },
+    watch: {
+        '$store.state.choosedCallSign'(newCallSign) {
+            if (newCallSign && this.planeCollection[newCallSign]) {
+                this.planeCollection[newCallSign].select();
+            }
+        }
+    },
     mounted() {
         this.map = new maplibregl.Map({
             container: 'map',
@@ -133,10 +140,8 @@ export default {
 
         removePlaneFromCollection(callSign) {
             this.$delete(this.planeCollection, callSign);
-        },
 
-        addPlaneToCollection(callSign, plane) {
-            this.$set(this.planeCollection, callSign, plane);
+            this.$store.commit('setPlanesCallSigns', this.planeCollection)
         },
 
         setupWebSocketPlanes() {
@@ -165,6 +170,7 @@ export default {
                         this.removePlaneFromCollection,
                         this.toggleSidebar,
                     );
+                    this.$store.commit('setPlanesCallSigns', this.planeCollection)
                     console.log(`Plane ${data.Callsign} added to collection.`);
 
 
@@ -286,13 +292,17 @@ class Plane {
         });
 
         this.map.on('click', this.layerId, (e) => {
-            this.isChoosed = true;
-            this.showRoute();
-            this.hideRoute();
-            this.toggleSidebar(this.callSign);
+            this.select()
         });
 
         this.startDeleteTimer();
+    };
+
+    select() {
+        this.isChoosed = true;
+        this.showRoute();
+        this.hideRoute();
+        this.toggleSidebar(this.callSign);
     };
 
     async showRoute() {
