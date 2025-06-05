@@ -50,7 +50,7 @@ export default {
         // Submit registration data to API
         async register() {
             try {
-                const response = await axios.post('http://localhost:8000/api/register/', this.form);
+                await axios.post('http://localhost:8000/api/register/', this.form);
 
                 // On successful registration, redirect to login page
                 this.$router.push('/login');
