@@ -1,5 +1,3 @@
-# views.py
-
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,7 +12,7 @@ from rest_framework.exceptions import NotFound
 from django.utils.timezone import now
 from datetime import timedelta
 
-# Skats lai iegūtu jaunāko informāciju par lidmašīnu pēc tās call_sign
+# View to get the latest information about a plane by its call_sign
 class PlaneDetailView(APIView):
     permission_classes = [AllowAny]
 
@@ -23,7 +21,7 @@ class PlaneDetailView(APIView):
             latest_plane = PositionData.objects.filter(call_sign=callsign).order_by('-id').first()
 
             if not latest_plane:
-                return Response({"error": "Lidmašīna nav atrasta"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({"error": "Plane not found"}, status=status.HTTP_404_NOT_FOUND)
 
             serializer = PositionDataSerializer(latest_plane)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -31,7 +29,7 @@ class PlaneDetailView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# Serializators lietotāja reģistrācijai
+# Serializer for user registration
 class RegisterSerializer(ModelSerializer):
     permission_classes = [AllowAny]
 
@@ -48,19 +46,19 @@ class RegisterSerializer(ModelSerializer):
         )
         return user
 
-# Skats reģistrācijai
+# View to handle user registration
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
-# Skats, lai iegūtu iepriekšējās pozīcijas pēdējo 5 minūšu laikā
+# View to get previous plane positions within the last 5 minutes
 class PreviousePositionsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, call_sign):
         """
-        Iegūst lidmašīnas pozīcijas pēc call_sign pēdējo 5 minūšu laikā.
+        Get the plane's positions by call_sign for the last 5 minutes.
         """
         current_time = now()
         positions = PositionData.objects.filter(
@@ -70,17 +68,17 @@ class PreviousePositionsView(APIView):
         ).order_by('-time_received')
 
         if not positions.exists():
-            raise NotFound({"detail": f"Nav atrastas pozīcijas priekš {call_sign} pēdējo 5 minūšu laikā."})
+            raise NotFound({"detail": f"No positions found for {call_sign} in the last 5 minutes."})
 
         serializer = PreviousePositionsSerializer(positions, many=True)
         return Response({"call_sign": call_sign, "positions": serializer.data})
 
-# Skats informācijas iegūšanai/parādīšanai, lietotāja datu atjaunošanai un dzēšanai
+# View to retrieve, update, or delete the current user's account info
 class AccountInfoView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Atgriež pašreizējā lietotāja informāciju
+        # Return current user's info
         user = request.user
         data = {
             "username": user.username,
@@ -91,22 +89,22 @@ class AccountInfoView(APIView):
         return Response(data)
 
     def put(self, request):
-        # Atjauno pašreizējā lietotāja informāciju
+        # Update current user's info
         user = request.user
         user.first_name = request.data.get("first_name", user.first_name)
         user.last_name = request.data.get("last_name", user.last_name)
         user.email = request.data.get("email", user.email)
         user.save()
         return Response(
-            {"message": "Dati veiksmīgi atjaunināti."},
+            {"message": "User info updated successfully."},
             status=status.HTTP_200_OK,
         )
 
     def delete(self, request):
-        # Dzēš pašreizējo lietotāja kontu
+        # Delete current user's account
         user = request.user
         user.delete()
         return Response(
-            {"message": "Konts veiksmīgi dzēsts."},
+            {"message": "Account deleted successfully."},
             status=status.HTTP_204_NO_CONTENT,
         )

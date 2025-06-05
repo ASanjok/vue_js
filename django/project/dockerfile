@@ -1,23 +1,33 @@
+# Use the official Python 3.11 slim base image
 FROM python:3.11-slim
 
+# Install system dependencies: GDAL for geospatial operations and Supervisor for process management
 RUN apt-get update && apt-get install -y gdal-bin supervisor
 
+# Set environment variables to help GDAL headers be found during package installation
 ARG CPLUS_INCLUDE_PATH=/usr/include/gdal
 ARG C_INCLUDE_PATH=/usr/include/gdal
 
+# Set the working directory inside the container
 WORKDIR /app
 
+# Copy requirements file and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install psycopg2-binary
 
+# Copy all project files into the container
 COPY . .
 
-
+# Create directory for Supervisor logs
 RUN mkdir -p /var/log/supervisor
 
+# Copy Supervisor configuration file to the appropriate location
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 
+# Expose port 8000 to the host machine
 EXPOSE 8000
 
+# Start Supervisor when the container runs
 CMD ["/usr/bin/supervisord"]
+

@@ -67,18 +67,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=2),  
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    
     'ROTATE_REFRESH_TOKENS': True,                 
     'BLACKLIST_AFTER_ROTATION': True                
 }
-
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),  # Время жизни токена доступа
-#     # Удаляем REFRESH_TOKEN_LIFETIME, так как не используем refresh токен
-#     'ROTATE_REFRESH_TOKENS': False,                  # Не обновлять refresh токен
-#     'BLACKLIST_AFTER_ROTATION': False
-# }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -128,8 +121,8 @@ DATABASES = {
         'NAME': 'flights_data_db',
         'USER': 'postgres',
         'PASSWORD': 'Password1234',
-        'HOST': 'db',
-        # 'HOST': 'localhost',
+        'HOST': 'db', # for start with docker
+        # 'HOST': 'localhost', # for local start
         'PORT': '5432',     
     }
 }
