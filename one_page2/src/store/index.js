@@ -9,6 +9,7 @@ export default new Vuex.Store({
     searchBarInput: '',          // User input from search bar
     planesCallSigns: {},         // Object storing all planes
     choosedCallSign: '',         // Currently selected call sign
+    mapStyle: 'liberty',
   },
   getters: {
     // Filter planesCallSigns by search input (case-insensitive)
@@ -20,6 +21,7 @@ export default new Vuex.Store({
     },
     // Getter for current search bar input
     searchBarInput: state => state.searchBarInput,
+    mapStyle: state =>state.mapStyle,
   },
   mutations: {
     // Update planesCallSigns object in state
@@ -33,6 +35,9 @@ export default new Vuex.Store({
     // Update the selected call sign
     setChoosedCallSign(state, newValue){
       state.choosedCallSign = newValue
+    },
+    setMapStyle(state, newValue){
+      state.mapStyle = newValue
     }
   },
   actions: {

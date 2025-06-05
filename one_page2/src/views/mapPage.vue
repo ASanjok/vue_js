@@ -62,6 +62,14 @@ export default {
         };
     },
     watch: {
+        '$store.state.mapStyle'(newStyle) {
+            if (this.map) {
+                const newStyleUrl = `https://tiles.openfreemap.org/styles/${newStyle}`;
+                this.map.setStyle(newStyleUrl);
+                console.log('Map style changed to:', newStyleUrl);
+                this.planeCollection = {};
+            }
+        },
         // Watcher for changes in selected callsign from Vuex store
         '$store.state.choosedCallSign'(newCallSign) {
             if (newCallSign && this.planeCollection[newCallSign]) {
@@ -111,7 +119,7 @@ export default {
         // Initialize the MapLibre map
         this.map = new maplibregl.Map({
             container: 'map', // HTML container ID for the map
-            style: 'https://tiles.openfreemap.org/styles/liberty', // Tile style URL
+            style: `https://tiles.openfreemap.org/styles/${this.$store.getters.mapStyle}`, // Tile style URL
             center: this.startCoordinates, // Initial center coordinates
             zoom: 6.5, // Initial zoom level
         });
@@ -375,7 +383,6 @@ class Plane {
     select() {
         this.isChoosed = true;
         this.showRoute();   // Show previous route
-        this.hideRoute();   // Immediately hides it (maybe to force refresh)
         this.toggleSidebar(this.callSign); // Open sidebar
     }
 

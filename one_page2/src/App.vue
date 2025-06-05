@@ -11,14 +11,23 @@
 
         <!-- Search results dropdown -->
         <b-list-group v-if="searchResults.length && searchInput" class="position-absolute w-100" style="z-index: 1000">
-          <b-list-group-item v-for="(result, index) in searchResults" :key="index" @click="chooseCallSign(result)" button>
+          <b-list-group-item v-for="(result, index) in searchResults" :key="index" @click="chooseCallSign(result)"
+            button>
             {{ result }}
           </b-list-group-item>
         </b-list-group>
       </div>
 
-      <!-- Account dropdown menu with links -->
+      <!-- Navbar right side: Style chooser + Account dropdown -->
       <b-navbar-nav class="ml-auto">
+        <!-- Style chooser dropdown -->
+        <b-nav-item-dropdown text="Map Style" right>
+          <b-dropdown-item v-for="style in mapStyles" :key="style.id" @click="changeMapStyle(style.id)">
+            {{ style.name }}
+          </b-dropdown-item>
+        </b-nav-item-dropdown>
+
+        <!-- Account dropdown menu -->
         <b-nav-item-dropdown text="Account" right>
           <b-dropdown-item to="/account">View account information</b-dropdown-item>
           <b-dropdown-item @click="logout">Log out</b-dropdown-item>
@@ -36,6 +45,10 @@ export default {
   data() {
     return {
       searchInput: '',  // User's input in the search bar
+      mapStyles: [
+        { id: 'liberty', name: 'Light' },
+        { id: 'dark', name: 'Dark' },
+      ]
     };
   },
   computed: {
@@ -63,6 +76,9 @@ export default {
     chooseCallSign(callsign) {
       this.searchInput = '';
       this.$store.commit('setChoosedCallSign', callsign);
+    },
+    changeMapStyle(style){
+      this.$store.commit('setMapStyle', style)
     }
   }
 };

@@ -1,7 +1,7 @@
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import PositionData
+from .models import PositionData, Place
 from .serializers import PositionDataSerializer, PreviousePositionsSerializer
 
 from rest_framework import generics, status
@@ -52,26 +52,45 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
-# View to get previous plane positions within the last 5 minutes
+# View to get previous plane positions for the 5 minutes
 class PreviousePositionsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, call_sign):
-        """
-        Get the plane's positions by call_sign for the last 5 minutes.
-        """
-        current_time = now()
-        positions = PositionData.objects.filter(
-            call_sign=call_sign,
-            position__isnull=False,
-            time_received__gte=current_time - timedelta(minutes=5)
+        # Get last Place entry related to PositionData with given call_sign
+        last_place = Place.objects.filter(
+            PositionData__call_sign=call_sign,
+            PositionData__position__isnull=False,
+            time_received__isnull=False
+        ).order_by('-time_received').first()
+
+        if not last_place:
+            raise NotFound({"detail": f"No positions found for {call_sign}."})
+
+        last_time = last_place.time_received
+        start_time = last_time - timedelta(minutes=5)
+
+        # Get all Place objects in the 5-minute window before last_time for the same call_sign
+        places = Place.objects.filter(
+            PositionData__call_sign=call_sign,
+            PositionData__position__isnull=False,
+            time_received__gte=start_time,
+            time_received__lt=last_time
         ).order_by('-time_received')
 
-        if not positions.exists():
-            raise NotFound({"detail": f"No positions found for {call_sign} in the last 5 minutes."})
+        if not places.exists():
+            raise NotFound({"detail": f"No positions found for {call_sign} in the 5 minutes before the last recorded position."})
 
-        serializer = PreviousePositionsSerializer(positions, many=True)
-        return Response({"call_sign": call_sign, "positions": serializer.data})
+        # Extract related PositionData from places
+        position_datas = [place.PositionData for place in places]
+
+        serializer = PreviousePositionsSerializer(position_datas, many=True)
+        return Response({
+            "call_sign": call_sign,
+            "start_time": start_time,
+            "end_time": last_time,
+            "positions": serializer.data
+        })
 
 # View to retrieve, update, or delete the current user's account info
 class AccountInfoView(APIView):
