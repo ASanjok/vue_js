@@ -3,13 +3,22 @@
         <div id="map"></div>
         <b-sidebar id="sidebar-no-header" aria-labelledby="sidebar-no-header-title" no-header shadow
             :visible="isSidebarVisible" :backdrop="false" @hidden="isSidebarVisible = false" bg-variant="light"
-            text-variant="dark" left style="width: 180px; ">
-            <template v-if="sidebarData">
+            text-variant="dark" left style="width: 180px;">
+            <template v-if="localSidebarData.length">
                 <b-card class="mb-2" header="header" header-bg-variant="primary" header-text-variant="white">
-                    <b-table striped hover small :items="formattedSidebarData" :fields="tableFields"
-                        responsive="sm"></b-table>
+
+                    <draggable v-model="localSidebarData">
+                        <transition-group name="flip-list" tag="ul">
+                            <li v-for="(item) in localSidebarData" :key="item.key" class="list-group-item py-1 px-2"
+                                style="cursor: move; list-style: none;">
+                                <strong>{{ item.key }}</strong>: {{ item.value }}
+                            </li>
+                        </transition-group>
+                    </draggable>
+
                 </b-card>
             </template>
+
             <template v-else>
                 <b-alert variant="info" show>
                     Loading...
@@ -25,41 +34,66 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import axios from 'axios';
-// import { ref } from 'vue';
+import draggable from 'vuedraggable';
 
 export default {
+    components: { draggable },
+    props: ['sidebarData'],
     data() {
         return {
+            localSidebarData: [],
             socketgetplane: null,
             map: null,
             startCoordinates: [24.7, 56.9],
             planeCollection: {},
             isSidebarVisible: false,
             sidebarCallSign: null,
-            sidebarData: {},
             tableFields: [
                 { key: 'key', label: 'Parameter' },
                 { key: 'value', label: 'Value' },
             ],
         };
     },
-    computed: {
-        formattedSidebarData() {
-            if (!this.sidebarData || Object.keys(this.sidebarData).length === 0) {
-                return [];
-            } else {
-                return Object.keys(this.sidebarData).map(key => ({
-                    key,
-                    value: this.sidebarData[key],
-                }));
-            }
-        },
-    },
     watch: {
         '$store.state.choosedCallSign'(newCallSign) {
             if (newCallSign && this.planeCollection[newCallSign]) {
                 this.planeCollection[newCallSign].select();
             }
+        },
+        sidebarData: {
+            handler(newVal) {
+                if (!newVal || Object.keys(newVal).length === 0) return;
+
+                const existingKeys = this.localSidebarData.map(i => i.key);
+                const newKeys = Object.keys(newVal);
+
+                // Сохраняем порядок из localSidebarData, добавляя новые элементы в конец
+                const updatedData = [];
+
+                // 1. Добавляем элементы, которые уже были
+                for (const key of existingKeys) {
+                    if (newKeys.includes(key)) {
+                        updatedData.push({
+                            key,
+                            value: newVal[key]
+                        });
+                    }
+                }
+
+                // 2. Добавляем новые элементы
+                for (const key of newKeys) {
+                    if (!existingKeys.includes(key)) {
+                        updatedData.push({
+                            key,
+                            value: newVal[key]
+                        });
+                    }
+                }
+
+                this.localSidebarData = updatedData;
+            },
+            immediate: true,
+            deep: true
         }
     },
     mounted() {
@@ -99,7 +133,6 @@ export default {
                 this.toggleSidebar();
             }
         });
-
     },
     created() {
         this.setupWebSocketPlanes();
@@ -110,7 +143,6 @@ export default {
             console.log("WebSocketGetPlane закрыт.");
         }
     },
-
     onBeforeUnmount() {
         if (this.socketgetplane) {
             this.socketgetplane.close();
@@ -118,6 +150,10 @@ export default {
         }
     },
     methods: {
+        onDragEnd() {
+            // можно сохранять порядок, если нужно
+            console.log("New order:", this.localSidebarData);
+        },
         async refreshToken() {
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
@@ -137,13 +173,11 @@ export default {
                 // logout(); // Logout if refresh fails
             }
         },
-
         removePlaneFromCollection(callSign) {
             this.$delete(this.planeCollection, callSign);
 
             this.$store.commit('setPlanesCallSigns', this.planeCollection)
         },
-
         setupWebSocketPlanes() {
             this.socketgetplane = new WebSocket('ws://localhost:8082');
 
@@ -184,9 +218,6 @@ export default {
                 console.error('WebSocketGetPlane error:', error);
             };
         },
-
-
-
         toggleSidebar(CallSign = null) {
             this.refreshToken();
             if (CallSign == null) {
@@ -206,7 +237,6 @@ export default {
                 }
             }
         },
-
     }
 };
 
@@ -488,5 +518,9 @@ class Plane {
 :deep(.b-sidebar) {
     width: fit-content;
     min-width: 33vw;
+}
+
+.flip-list-move {
+    transition: transform 0.3s ease;
 }
 </style>
