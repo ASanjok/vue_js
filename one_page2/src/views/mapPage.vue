@@ -111,7 +111,7 @@ export default {
         // Initialize the MapLibre map
         this.map = new maplibregl.Map({
             container: 'map', // HTML container ID for the map
-            style: 'https://tiles.openfreemap.org/styles/liberty', // Tile style URL
+            style: 'https://tiles.openfreemap.org/styles/dark-matter-gl-style', // Tile style URL
             center: this.startCoordinates, // Initial center coordinates
             zoom: 6.5, // Initial zoom level
         });
