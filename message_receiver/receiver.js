@@ -4,40 +4,37 @@ const ws = require('ws');
 const app = express();
 const serverWS = new ws.Server({ port: 8082, host: '0.0.0.0' });; 
 
-app.use(express.json()); // Для обработки текстового тела запроса
+app.use(express.json());
 
 const RABBITMQ_URL = 'amqp://admin:Password1234@rabbitmq:5672';
 const QUEUE_NAME = 'to_django_data';
 
-let channel; // Переменная для хранения канала
+let channel;
 
-// Инициализация подключения и канала RabbitMQ
 async function initializeRabbitMQ() {
     try {
         const connection = await amqp.connect(RABBITMQ_URL);
         channel = await connection.createChannel();
 
-        // Убедимся, что очередь существует
         await channel.assertQueue(QUEUE_NAME, {
-            durable: true, // Очередь устойчивая
+            durable: true, 
         });
 
         console.log('RabbitMQ connection and channel initialized.');
     } catch (error) {
         console.error('Failed to initialize RabbitMQ:', error);
-        process.exit(1); // Завершаем процесс, если RabbitMQ недоступен
+        process.exit(1);
     }
 }
 
-// Функция для отправки сообщения
+
 async function sendMessageToQueue(message) {
     try {
         if (!channel) {
             throw new Error('RabbitMQ channel is not initialized.');
         }
-        // Отправляем сообщение в очередь
         channel.sendToQueue(QUEUE_NAME, Buffer.from(JSON.stringify(message)), {
-            persistent: true, // Сообщение сохраняется на диске
+            persistent: true, 
         });
         console.log(` [x] Sent message to queue '${QUEUE_NAME}':`);
     } catch (error) {
@@ -47,7 +44,6 @@ async function sendMessageToQueue(message) {
 
 async function sendMessageToVue(message) {
     try {
-        // Отправляем сообщение всем подключенным WebSocket-клиентам
         serverWS.clients.forEach((client) => {
             if (client.readyState === ws.OPEN) {
                 const filteredMessage = {
@@ -58,7 +54,7 @@ async function sendMessageToVue(message) {
                     VEPU: message.VEPU,
                     HFOMr: message.HFOMr,
                     Speed: message.Speed,
-                    Track: message.Track, //been direction
+                    Track: message.Track,
                     VFOMr: message.VFOMr,
                     Altitude: message.Altitude,
                     Callsign: message.Callsign,
@@ -78,11 +74,9 @@ async function sendMessageToVue(message) {
     }
 }
 
-// Маршрут для приёма сообщений
+
 app.post('/sendMessage', async (req, res) => {
     const message = req.body;
-    // console.log(req)
-    // console.log(req.body)
 
     if (!message) {
         return res.status(400).send('"message" is required in request body.');
@@ -93,8 +87,7 @@ app.post('/sendMessage', async (req, res) => {
     res.send('Message sent to RabbitMQ.');
 });
 
-// Запуск сервера и RabbitMQ
 app.listen(3000, async () => {
     console.log('Server running on http://localhost:3000');
-    await initializeRabbitMQ(); // Инициализируем RabbitMQ при запуске
+    await initializeRabbitMQ(); 
 });

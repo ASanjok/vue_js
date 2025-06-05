@@ -67,10 +67,8 @@ export default {
                 const existingKeys = this.localSidebarData.map(i => i.key);
                 const newKeys = Object.keys(newVal);
 
-                // Сохраняем порядок из localSidebarData, добавляя новые элементы в конец
                 const updatedData = [];
 
-                // 1. Добавляем элементы, которые уже были
                 for (const key of existingKeys) {
                     if (newKeys.includes(key)) {
                         updatedData.push({
@@ -80,7 +78,6 @@ export default {
                     }
                 }
 
-                // 2. Добавляем новые элементы
                 for (const key of newKeys) {
                     if (!existingKeys.includes(key)) {
                         updatedData.push({
@@ -108,18 +105,15 @@ export default {
             const features = this.map.queryRenderedFeatures(e.point);
 
             if (!features.length) {
-                // Удалить маршрут, если кликнули на пустую область
                 const layers = this.map.getStyle().layers;
                 const sources = this.map.getStyle().sources;
 
-                // Удаляем все слои, начинающиеся с "route-layer-"
                 layers.forEach(layer => {
                     if (layer.id.startsWith('route-layer-')) {
                         this.map.removeLayer(layer.id);
                     }
                 });
 
-                // Удаляем все источники, начинающиеся с "route-"
                 Object.keys(sources).forEach(sourceId => {
                     if (sourceId.startsWith('route-')) {
                         this.map.removeSource(sourceId);
@@ -151,7 +145,6 @@ export default {
     },
     methods: {
         onDragEnd() {
-            // можно сохранять порядок, если нужно
             console.log("New order:", this.localSidebarData);
         },
         async refreshToken() {
@@ -170,7 +163,6 @@ export default {
                 }
             } catch (error) {
                 console.error('Failed to refresh token:', error);
-                // logout(); // Logout if refresh fails
             }
         },
         removePlaneFromCollection(callSign) {
@@ -189,7 +181,6 @@ export default {
                 console.log('--------------------------------');
                 const data = JSON.parse(event.data);
                 console.log('Received plane:', data);
-                // const position = [data.Position_latitude, data.Position_longitude];
 
                 if (this.planeCollection[data.Callsign]) {
                     console.log(`Plane with callSign ${data.Callsign} already exists.`);
@@ -228,10 +219,8 @@ export default {
                 this.isSidebarVisible = true;
                 this.sidebarCallSign = CallSign;
 
-                // Если самолет есть в коллекции, обновляем sidebarData
                 console.log("sidebar open )))))", this.planeCollection[CallSign])
                 if (this.planeCollection[CallSign]) {
-                    // this.sidebarData = this.planeCollection[CallSign].sidebarData;
                     this.sidebarData = { longitude: this.planeCollection[CallSign].longitude, latitude: this.planeCollection[CallSign].latitude, callSign: this.planeCollection[CallSign].callSign }
                     console.log("((()))", this.sidebarData)
                 }
@@ -254,37 +243,37 @@ class Plane {
         this.removePlaneFromCollection = removePlaneFromCollection;
         this.toggleSidebar = toggleSidebar;
         this.previousPositions = [];
-        this.routeSourceId = `route-${callSign}`; // Имя источника маршрута
-        this.routeLayerId = `route-layer-${callSign}`; // Имя слоя маршрута
+        this.routeSourceId = `route-${callSign}`; 
+        this.routeLayerId = `route-layer-${callSign}`; 
         this.isChoosed = false;
-        this.sidebarData = sidebardata;//ref было 
+        this.sidebarData = sidebardata;
 
         console.log(`${this.callSign} plane has been created.`);
 
-        const width = 16;  // Ширина изображения
-        const height = 16; // Высота изображения
+        const width = 16;  
+        const height = 16; 
         const bytesPerPixel = 4;
         const data = new Uint8Array(width * height * bytesPerPixel);
 
-        const triangleColor = [255, 100, 50, 255]; // Цвет треугольника (R, G, B, A)
+        const triangleColor = [255, 100, 50, 255]; 
 
         const centerX = width / 2;
-        const baseY = height - 1;  // Основание треугольника снизу
-        const peakY = 2;  // Верхушка треугольника
+        const baseY = height - 1;
+        const peakY = 2; 
 
-        const baseWidthFactor = 0.3; // Уменьшаем ширину треугольника (0.5 - обычный, 0.3 - более узкий)
+        const baseWidthFactor = 0.3;
 
         for (let y = peakY; y <= baseY; y++) {
-            let halfWidth = ((y - peakY) / (baseY - peakY)) * (width * baseWidthFactor); // Уже основание
+            let halfWidth = ((y - peakY) / (baseY - peakY)) * (width * baseWidthFactor); 
             let leftX = Math.floor(centerX - halfWidth);
             let rightX = Math.ceil(centerX + halfWidth);
 
             for (let x = leftX; x <= rightX; x++) {
                 const offset = (y * width + x) * bytesPerPixel;
-                data[offset + 0] = triangleColor[0]; // R
-                data[offset + 1] = triangleColor[1]; // G
-                data[offset + 2] = triangleColor[2]; // B
-                data[offset + 3] = triangleColor[3]; //
+                data[offset + 0] = triangleColor[0]; 
+                data[offset + 1] = triangleColor[1]; 
+                data[offset + 2] = triangleColor[2]; 
+                data[offset + 3] = triangleColor[3]; 
             }
         }
 
@@ -342,7 +331,7 @@ class Plane {
         }
 
         try {
-            const token = localStorage.getItem('authToken'); // Получение токена из хранилища
+            const token = localStorage.getItem('authToken');
             const response = await fetch(`http://localhost:8000/api/previousePositions/${this.callSign}/`, {
                 method: 'GET',
                 headers: {
@@ -355,27 +344,25 @@ class Plane {
                 throw new Error('Ошибка загрузки данных');
             }
 
-            const positions = await response.json(); // Получаем данные от сервера
+            const positions = await response.json();
             console.log("\n\nПолученные позиции:\n", positions);
 
-            // Парсинг координат из позиции
             const coordinates = positions.positions.map(pos => {
-                const wkt = pos.position; // Например: 'SRID=4326;POINT (21.00436123934659 56.54013061523438)'
+                const wkt = pos.position; 
                 const match = wkt.match(/POINT\s?\(([-\d.]+)\s+([-\d.]+)\)/);
                 if (match) {
                     const longitude = parseFloat(match[1]);
                     const latitude = parseFloat(match[2]);
                     return [longitude, latitude];
                 }
-                return null; // Игнорировать некорректные данные
-            }).filter(coord => coord !== null); // Удалить возможные null значения
+                return null; 
+            }).filter(coord => coord !== null); 
 
             if (coordinates.length === 0) {
                 console.error("Нет координат для отображения маршрута.");
                 return;
             }
 
-            // Добавление маршрута на карту
             this.map.addSource(this.routeSourceId, {
                 type: 'geojson',
                 data: {
@@ -385,7 +372,7 @@ class Plane {
                             type: 'Feature',
                             geometry: {
                                 type: 'LineString',
-                                coordinates: coordinates, // Данные маршрута
+                                coordinates: coordinates,
                             },
                         },
                     ],
@@ -416,14 +403,12 @@ class Plane {
         const layers = this.map.getStyle().layers;
         const sources = this.map.getStyle().sources;
 
-        // Удаляем все слои, начинающиеся с "route-layer-"
         layers.forEach(layer => {
             if (layer.id.startsWith('route-layer-')) {
                 this.map.removeLayer(layer.id);
             }
         });
 
-        // Удаляем все источники, начинающиеся с "route-"
         Object.keys(sources).forEach(sourceId => {
             if (sourceId.startsWith('route-')) {
                 this.map.removeSource(sourceId);
@@ -434,7 +419,6 @@ class Plane {
     }
 
     updatePosition(data) {
-        //.Position_longitude, data.Position_latitude, data.Track);
         this.longitude = data.Position_longitude;
         this.latitude = data.Position_latitude;
         this.rotation = data.Track;
@@ -459,11 +443,9 @@ class Plane {
 
         if (this.isChoosed) {
             if (this.map.getSource(this.routeSourceId)) {
-                // Дополнить маршрут новыми координатами
                 const routeData = this.map.getSource(this.routeSourceId)._data;
                 routeData.features[0].geometry.coordinates.push([this.longitude, this.latitude]);
 
-                // Обновить источник маршрута
                 this.map.getSource(this.routeSourceId).setData(routeData);
             }
         }
