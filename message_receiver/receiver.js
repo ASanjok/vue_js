@@ -2,7 +2,7 @@ const amqp = require('amqplib');
 const express = require('express');
 const ws = require('ws');
 const app = express();
-const serverWS = new ws.Server({ port: 8082, host: '0.0.0.0' });; 
+const serverWS = new ws.Server({ port: 8082, host: '0.0.0.0' }); 
 
 app.use(express.json());
 
@@ -11,11 +11,13 @@ const QUEUE_NAME = 'to_django_data';
 
 let channel;
 
+// Initialize RabbitMQ connection and channel
 async function initializeRabbitMQ() {
     try {
         const connection = await amqp.connect(RABBITMQ_URL);
         channel = await connection.createChannel();
 
+        // Ensure the queue exists and is durable
         await channel.assertQueue(QUEUE_NAME, {
             durable: true, 
         });
@@ -27,14 +29,14 @@ async function initializeRabbitMQ() {
     }
 }
 
-
+// Send a message to the RabbitMQ queue
 async function sendMessageToQueue(message) {
     try {
         if (!channel) {
             throw new Error('RabbitMQ channel is not initialized.');
         }
         channel.sendToQueue(QUEUE_NAME, Buffer.from(JSON.stringify(message)), {
-            persistent: true, 
+            persistent: true, // Make message persistent
         });
         console.log(` [x] Sent message to queue '${QUEUE_NAME}':`);
     } catch (error) {
@@ -42,10 +44,12 @@ async function sendMessageToQueue(message) {
     }
 }
 
+// Send a filtered message to all connected WebSocket clients
 async function sendMessageToVue(message) {
     try {
         serverWS.clients.forEach((client) => {
             if (client.readyState === ws.OPEN) {
+                // Prepare the filtered message to send over WebSocket
                 const filteredMessage = {
                     RC: message.Rc,
                     EPU: message.EPU,
@@ -74,7 +78,7 @@ async function sendMessageToVue(message) {
     }
 }
 
-
+// HTTP POST endpoint to receive a message, send it to RabbitMQ and WebSocket clients
 app.post('/sendMessage', async (req, res) => {
     const message = req.body;
 
@@ -87,6 +91,7 @@ app.post('/sendMessage', async (req, res) => {
     res.send('Message sent to RabbitMQ.');
 });
 
+// Start Express server and initialize RabbitMQ connection
 app.listen(3000, async () => {
     console.log('Server running on http://localhost:3000');
     await initializeRabbitMQ(); 
