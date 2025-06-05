@@ -25,7 +25,6 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import axios from 'axios';
-// import { ref } from 'vue';
 
 export default {
     data() {
