@@ -69,8 +69,6 @@ export default {
             accountFields: {         // Fields to display on account info card
                 username: { label: 'Username' },
                 email: { label: 'Email' },
-                first_name: { label: 'First Name' },
-                last_name: { label: 'Last Name' }
             }
         };
     },

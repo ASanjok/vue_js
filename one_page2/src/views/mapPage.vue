@@ -80,39 +80,115 @@ export default {
         // Watcher for incoming sidebar data updates
         sidebarData: {
             handler(newVal) {
-                // Skip update if sidebar data is empty
                 if (!newVal || Object.keys(newVal).length === 0) return;
 
-                const existingKeys = this.localSidebarData.map(i => i.key);
-                const newKeys = Object.keys(newVal);
+                const keyLabelMap = {
+                    Speed: 'Speed (km/h)',
+                    Track: 'Track (°)',
+                    Altitude: 'Altitude (km)',
+                    Position_latitude: 'Latitude',
+                    Position_longitude: 'Longitude',
+                    RC: 'Radius of Containment (RC)',
+                    EPU: 'Estimated Position Uncertainty (EPU)',
+                    ICAO: 'ICAO ID',
+                    VEPU: 'Vertical EPU',
+                    HFOMr: 'Horizontal Figure of Merit',
+                    VFOMr: 'Vertical Figure of Merit',
+                    Callsign: 'Call Sign',
+                    PlaceName: 'Location',
+                    PlaneDistance: 'Distance to Location (km)',
+                    TimeReceived: 'Time Received',
+                };
 
+                const existingKeys = this.localSidebarData.map(i => i.key);
                 const updatedData = [];
 
-                // Retain the existing order where possible and update values
-                for (const key of existingKeys) {
-                    if (newKeys.includes(key)) {
-                        updatedData.push({
-                            key,
-                            value: newVal[key]
-                        });
+                // Format date as "5 February 2025, 19:25"
+                const formatDate = (value) => {
+                    const date = new Date(value);
+                    return isNaN(date) ? value : date.toLocaleString('en-GB', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    });
+                };
+
+                // Format numeric values to 2 decimals
+                const toFixed = (val, decimals = 2) => Number.parseFloat(val).toFixed(decimals);
+
+                // Update existing keys preserving order
+                for (const item of this.localSidebarData) {
+                    const rawKey = Object.keys(keyLabelMap).find(k => keyLabelMap[k] === item.key);
+                    let value = newVal[rawKey];
+
+                    if (value !== undefined) {
+                        switch (rawKey) {
+                            case 'Altitude':
+                                value = `${toFixed(value / 1000, 2)} km`;
+                                break;
+                            case 'PlaneDistance':
+                                value = `${toFixed(value, 2)} km`;
+                                break;
+                            case 'Speed':
+                                value = `${toFixed(value * 1.852, 1)} km/h`;
+                                break;
+                            case 'Track':
+                                value = toFixed(value, 0);
+                                break;
+                            case 'Position_latitude':
+                            case 'Position_longitude':
+                                value = toFixed(value, 2);
+                                break;
+                            case 'MlatTime':
+                            case 'TimeReceived':
+                                value = formatDate(value);
+                                break;
+                        }
+                        updatedData.push({ key: item.key, value });
+                    } else {
+                        updatedData.push(item); // Keep the current one if no new value
                     }
                 }
 
-                // Append any new keys that weren't previously listed
-                for (const key of newKeys) {
-                    if (!existingKeys.includes(key)) {
-                        updatedData.push({
-                            key,
-                            value: newVal[key]
-                        });
+                // Add any new keys not in localSidebarData yet
+                for (const rawKey of Object.keys(newVal)) {
+                    const label = keyLabelMap[rawKey];
+                    if (label && !existingKeys.includes(label)) {
+                        let value = newVal[rawKey];
+
+                        switch (rawKey) {
+                            case 'Altitude':
+                                value = `${toFixed(value / 1000, 3)} km`;
+                                break;
+                            case 'PlaneDistance':
+                                value = `${toFixed(value, 2)} km`;
+                                break;
+                            case 'Speed':
+                                value = `${toFixed(value * 1.852, 1)} km/h`;
+                                break;
+                            case 'Track':
+                            case 'Position_latitude':
+                            case 'Position_longitude':
+                                value = toFixed(value, 2);
+                                break;
+                            case 'MlatTime':
+                            case 'TimeReceived':
+                                value = formatDate(value);
+                                break;
+                        }
+
+                        updatedData.push({ key: label, value });
                     }
                 }
 
-                // Update the sidebar with the new merged and ordered list
                 this.localSidebarData = updatedData;
             },
-            immediate: true,  // Trigger immediately on component mount
-            deep: true        // Watch deeply for nested changes
+            immediate: true,
+            deep: true
         }
     },
     mounted() {
