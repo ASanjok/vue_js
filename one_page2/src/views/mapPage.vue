@@ -1,12 +1,16 @@
 <template>
     <div>
+        <!-- Main map container -->
         <div id="map"></div>
+
+        <!-- Sidebar displaying additional flight data -->
         <b-sidebar id="sidebar-no-header" aria-labelledby="sidebar-no-header-title" no-header shadow
             :visible="isSidebarVisible" :backdrop="false" @hidden="isSidebarVisible = false" bg-variant="light"
             text-variant="dark" left style="width: 180px;">
+            <!-- If there is data, display it in a draggable list -->
             <template v-if="localSidebarData.length">
                 <b-card class="mb-2" header="header" header-bg-variant="primary" header-text-variant="white">
-
+                    <!-- Draggable list of key-value pairs -->
                     <draggable v-model="localSidebarData">
                         <transition-group name="flip-list" tag="ul">
                             <li v-for="(item) in localSidebarData" :key="item.key" class="list-group-item py-1 px-2"
@@ -15,10 +19,10 @@
                             </li>
                         </transition-group>
                     </draggable>
-
                 </b-card>
             </template>
 
+            <!-- Show loading message if no data -->
             <template v-else>
                 <b-alert variant="info" show>
                     Loading...
@@ -29,6 +33,7 @@
 </template>
 
 
+
 <script>
 /* eslint-disable */
 import maplibregl from 'maplibre-gl';
@@ -37,31 +42,37 @@ import axios from 'axios';
 import draggable from 'vuedraggable';
 
 export default {
-    components: { draggable },
-    props: ['sidebarData'],
+    components: {
+        draggable  // Enables drag-and-drop functionality inside the sidebar
+    },
+    props: ['sidebarData'],  // Receives flight data for the sidebar as a prop
     data() {
         return {
-            localSidebarData: [],
-            socketgetplane: null,
-            map: null,
-            startCoordinates: [24.7, 56.9],
-            planeCollection: {},
-            isSidebarVisible: false,
-            sidebarCallSign: null,
-            tableFields: [
+            localSidebarData: [],          // Local copy of sidebar data for display and manipulation
+            socketgetplane: null,          // WebSocket connection for receiving live plane data
+            map: null,                     // MapLibre map instance
+            startCoordinates: [24.7, 56.9], // Initial map center (Riga, Latvia)
+            planeCollection: {},           // Stores all plane markers and related data
+            isSidebarVisible: false,       // Controls sidebar visibility
+            sidebarCallSign: null,         // Currently selected callsign (plane identifier)
+            tableFields: [                 // Table layout structure for displaying key-value pairs
                 { key: 'key', label: 'Parameter' },
                 { key: 'value', label: 'Value' },
             ],
         };
     },
     watch: {
+        // Watcher for changes in selected callsign from Vuex store
         '$store.state.choosedCallSign'(newCallSign) {
             if (newCallSign && this.planeCollection[newCallSign]) {
+                // If the selected plane exists, trigger its highlight/select logic
                 this.planeCollection[newCallSign].select();
             }
         },
+        // Watcher for incoming sidebar data updates
         sidebarData: {
             handler(newVal) {
+                // Skip update if sidebar data is empty
                 if (!newVal || Object.keys(newVal).length === 0) return;
 
                 const existingKeys = this.localSidebarData.map(i => i.key);
@@ -69,6 +80,7 @@ export default {
 
                 const updatedData = [];
 
+                // Retain the existing order where possible and update values
                 for (const key of existingKeys) {
                     if (newKeys.includes(key)) {
                         updatedData.push({
@@ -78,6 +90,7 @@ export default {
                     }
                 }
 
+                // Append any new keys that weren't previously listed
                 for (const key of newKeys) {
                     if (!existingKeys.includes(key)) {
                         updatedData.push({
@@ -87,70 +100,84 @@ export default {
                     }
                 }
 
+                // Update the sidebar with the new merged and ordered list
                 this.localSidebarData = updatedData;
             },
-            immediate: true,
-            deep: true
+            immediate: true,  // Trigger immediately on component mount
+            deep: true        // Watch deeply for nested changes
         }
     },
     mounted() {
+        // Initialize the MapLibre map
         this.map = new maplibregl.Map({
-            container: 'map',
-            style: 'https://tiles.openfreemap.org/styles/liberty',
-            center: this.startCoordinates,
-            zoom: 6.5,
+            container: 'map', // HTML container ID for the map
+            style: 'https://tiles.openfreemap.org/styles/liberty', // Tile style URL
+            center: this.startCoordinates, // Initial center coordinates
+            zoom: 6.5, // Initial zoom level
         });
 
+        // Event handler for map clicks
         this.map.on('click', (e) => {
+            // Get all features under the clicked point
             const features = this.map.queryRenderedFeatures(e.point);
 
+            // If the user clicked on empty space
             if (!features.length) {
                 const layers = this.map.getStyle().layers;
                 const sources = this.map.getStyle().sources;
 
+                // Remove all route-related layers
                 layers.forEach(layer => {
                     if (layer.id.startsWith('route-layer-')) {
                         this.map.removeLayer(layer.id);
                     }
                 });
 
+                // Remove all route-related sources
                 Object.keys(sources).forEach(sourceId => {
                     if (sourceId.startsWith('route-')) {
                         this.map.removeSource(sourceId);
                     }
                 });
 
+                // Deselect all planes
                 Object.values(this.planeCollection).forEach((plane) => {
                     plane.isChoosed = false;
                 });
 
+                // Toggle sidebar visibility
                 this.toggleSidebar();
             }
         });
     },
     created() {
+        // Set up the WebSocket connection for receiving live plane data
         this.setupWebSocketPlanes();
     },
     beforeDestroy() {
+        // Close WebSocket connection when component is about to be destroyed
         if (this.socketgetplane) {
             this.socketgetplane.close();
-            console.log("WebSocketGetPlane закрыт.");
+            console.log("WebSocketGetPlane closed.");
         }
     },
     onBeforeUnmount() {
         if (this.socketgetplane) {
             this.socketgetplane.close();
-            console.log("WebSocketGetPlane закрыт.");
+            console.log("WebSocketGetPlane closed.");
         }
     },
     methods: {
+        // Called when the drag-and-drop operation ends
         onDragEnd() {
             console.log("New order:", this.localSidebarData);
         },
+
+        // Refresh the JWT access token using the stored refresh token
         async refreshToken() {
             try {
                 const refreshToken = localStorage.getItem('refreshToken');
-                console.log("refresh token used - ", refreshToken)
+                console.log("refresh token used - ", refreshToken);
                 if (refreshToken) {
                     const response = await axios.post('http://localhost:8000/api/token/refresh/', {
                         refresh: refreshToken,
@@ -165,11 +192,14 @@ export default {
                 console.error('Failed to refresh token:', error);
             }
         },
+
+        // Remove a plane from the plane collection by its call sign
         removePlaneFromCollection(callSign) {
             this.$delete(this.planeCollection, callSign);
-
-            this.$store.commit('setPlanesCallSigns', this.planeCollection)
+            this.$store.commit('setPlanesCallSigns', this.planeCollection);
         },
+
+        // Set up a WebSocket connection to receive live plane data
         setupWebSocketPlanes() {
             this.socketgetplane = new WebSocket('ws://localhost:8082');
 
@@ -177,15 +207,18 @@ export default {
                 console.log('WebSocketGetPlane connected');
             };
 
+            // When a message (plane data) is received from the server
             this.socketgetplane.onmessage = (event) => {
                 console.log('--------------------------------');
                 const data = JSON.parse(event.data);
                 console.log('Received plane:', data);
 
+                // If plane already exists in the collection, update its position
                 if (this.planeCollection[data.Callsign]) {
                     console.log(`Plane with callSign ${data.Callsign} already exists.`);
                     this.planeCollection[data.Callsign].updatePosition(data);
                 } else {
+                    // If not, create a new plane and add it to the collection
                     this.planeCollection[data.Callsign] = new Plane(
                         data.Position_longitude,
                         data.Position_latitude,
@@ -195,34 +228,44 @@ export default {
                         this.removePlaneFromCollection,
                         this.toggleSidebar,
                     );
-                    this.$store.commit('setPlanesCallSigns', this.planeCollection)
+                    this.$store.commit('setPlanesCallSigns', this.planeCollection);
                     console.log(`Plane ${data.Callsign} added to collection.`);
-
-
                 }
+
+                // Update sidebar data if it is currently showing this plane
                 if (this.isSidebarVisible && this.sidebarCallSign === data.Callsign) {
                     this.sidebarData = data;
                 }
             };
 
+            // Handle WebSocket errors
             this.socketgetplane.onerror = (error) => {
                 console.error('WebSocketGetPlane error:', error);
             };
         },
+
+        // Show or hide the sidebar with plane details
         toggleSidebar(CallSign = null) {
-            this.refreshToken();
+            this.refreshToken(); // Refresh token each time sidebar is toggled
+
             if (CallSign == null) {
+                // Hide sidebar and reset data
                 this.isSidebarVisible = false;
                 this.sidebarCallSign = null;
                 this.sidebarData = {};
             } else {
+                // Show sidebar and populate data for selected plane
                 this.isSidebarVisible = true;
                 this.sidebarCallSign = CallSign;
 
-                console.log("sidebar open )))))", this.planeCollection[CallSign])
+                console.log("sidebar open )))))", this.planeCollection[CallSign]);
                 if (this.planeCollection[CallSign]) {
-                    this.sidebarData = { longitude: this.planeCollection[CallSign].longitude, latitude: this.planeCollection[CallSign].latitude, callSign: this.planeCollection[CallSign].callSign }
-                    console.log("((()))", this.sidebarData)
+                    this.sidebarData = {
+                        longitude: this.planeCollection[CallSign].longitude,
+                        latitude: this.planeCollection[CallSign].latitude,
+                        callSign: this.planeCollection[CallSign].callSign,
+                    };
+                    console.log("((()))", this.sidebarData);
                 }
             }
         },
@@ -231,18 +274,27 @@ export default {
 
 class Plane {
     constructor(longitude, latitude, callSign, rotation, map, removePlaneFromCollection, toggleSidebar, sidebardata) {
+        // Initial position and data
         this.longitude = longitude;
         this.latitude = latitude;
         this.rotation = rotation;
         this.callSign = callSign;
+
+        // Unique identifiers for map source/layer
         this.sourceId = `plane-source-${callSign}`;
         this.layerId = `plane-layer-${callSign}`;
+
         this.map = map;
+
+        // How long to wait (ms) before removing a plane if not updated
         this.deleteAfterSeconds = 15000;
         this.timer = null;
+
         this.removePlaneFromCollection = removePlaneFromCollection;
         this.toggleSidebar = toggleSidebar;
         this.previousPositions = [];
+
+        // For route tracking (polyline)
         this.routeSourceId = `route-${callSign}`;
         this.routeLayerId = `route-layer-${callSign}`;
         this.isChoosed = false;
@@ -250,19 +302,19 @@ class Plane {
 
         console.log(`${this.callSign} plane has been created.`);
 
+        // Draw the plane icon as a triangle on a small canvas
         const width = 16;
         const height = 16;
         const bytesPerPixel = 4;
         const data = new Uint8Array(width * height * bytesPerPixel);
-
-        const triangleColor = [255, 100, 50, 255];
+        const triangleColor = [255, 100, 50, 255]; // RGBA
 
         const centerX = width / 2;
         const baseY = height - 1;
         const peakY = 2;
-
         const baseWidthFactor = 0.3;
 
+        // Create triangle shape pixel by pixel
         for (let y = peakY; y <= baseY; y++) {
             let halfWidth = ((y - peakY) / (baseY - peakY)) * (width * baseWidthFactor);
             let leftX = Math.floor(centerX - halfWidth);
@@ -277,7 +329,7 @@ class Plane {
             }
         }
 
-
+        // Add plane icon and data source to the map
         this.map.addImage(`plane-${callSign}`, { width, height: width, data });
 
         this.map.addSource(this.sourceId, {
@@ -297,7 +349,7 @@ class Plane {
                     },
                 ],
             },
-        },);
+        });
 
         this.map.addLayer({
             id: this.layerId,
@@ -310,20 +362,24 @@ class Plane {
             },
         });
 
+        // Set up click handler for selecting this plane
         this.map.on('click', this.layerId, (e) => {
-            this.select()
+            this.select();
         });
 
+        // Start the self-destruction timer if not updated
         this.startDeleteTimer();
-    };
+    }
 
+    // Called when the plane is clicked
     select() {
         this.isChoosed = true;
-        this.showRoute();
-        this.hideRoute();
-        this.toggleSidebar(this.callSign);
-    };
+        this.showRoute();   // Show previous route
+        this.hideRoute();   // Immediately hides it (maybe to force refresh)
+        this.toggleSidebar(this.callSign); // Open sidebar
+    }
 
+    // Load and draw route of previous positions from the backend
     async showRoute() {
         if (this.map.getSource(this.routeSourceId)) {
             this.map.removeLayer(this.routeLayerId);
@@ -341,25 +397,24 @@ class Plane {
             });
 
             if (!response.ok) {
-                throw new Error('Ошибка загрузки данных');
+                throw new Error('Error loading route data');
             }
 
             const positions = await response.json();
-            console.log("\n\nПолученные позиции:\n", positions);
+            console.log("\n\nReceived positions:\n", positions);
 
+            // Parse WKT POINT format
             const coordinates = positions.positions.map(pos => {
                 const wkt = pos.position;
                 const match = wkt.match(/POINT\s?\(([-\d.]+)\s+([-\d.]+)\)/);
                 if (match) {
-                    const longitude = parseFloat(match[1]);
-                    const latitude = parseFloat(match[2]);
-                    return [longitude, latitude];
+                    return [parseFloat(match[1]), parseFloat(match[2])];
                 }
                 return null;
             }).filter(coord => coord !== null);
 
             if (coordinates.length === 0) {
-                console.error("Нет координат для отображения маршрута.");
+                console.error("No coordinates to display route.");
                 return;
             }
 
@@ -393,12 +448,13 @@ class Plane {
                 },
             });
 
-            console.log("Маршрут успешно отображён.");
+            console.log("Route displayed successfully.");
         } catch (error) {
-            console.error(`Ошибка загрузки маршрута для ${this.callSign}:`, error);
+            console.error(`Error loading route for ${this.callSign}:`, error);
         }
     }
 
+    // Remove all route layers and sources from the map
     hideRoute() {
         const layers = this.map.getStyle().layers;
         const sources = this.map.getStyle().sources;
@@ -415,9 +471,10 @@ class Plane {
             }
         });
 
-        console.log("Удалены все маршруты.");
+        console.log("All routes removed.");
     }
 
+    // Update plane's position and optionally extend its route
     updatePosition(data) {
         this.longitude = data.Position_longitude;
         this.latitude = data.Position_latitude;
@@ -441,19 +498,21 @@ class Plane {
             });
         }
 
-        if (this.isChoosed) {
-            if (this.map.getSource(this.routeSourceId)) {
-                const routeData = this.map.getSource(this.routeSourceId)._data;
-                routeData.features[0].geometry.coordinates.push([this.longitude, this.latitude]);
-
-                this.map.getSource(this.routeSourceId).setData(routeData);
-            }
+        // Add point to route if selected
+        if (this.isChoosed && this.map.getSource(this.routeSourceId)) {
+            const routeData = this.map.getSource(this.routeSourceId)._data;
+            routeData.features[0].geometry.coordinates.push([this.longitude, this.latitude]);
+            this.map.getSource(this.routeSourceId).setData(routeData);
         }
+
+        // Update sidebar
         this.sidebarData = data;
 
+        // Restart delete timer
         this.resetDeleteTimer();
     }
 
+    // Start self-deletion timer
     startDeleteTimer() {
         this.timer = setTimeout(() => {
             console.log(`${this.callSign} not updated, removing from collection.`);
@@ -461,6 +520,7 @@ class Plane {
         }, this.deleteAfterSeconds);
     }
 
+    // Reset deletion timer if update is received
     resetDeleteTimer() {
         if (this.timer) {
             clearTimeout(this.timer);
@@ -468,14 +528,17 @@ class Plane {
         this.startDeleteTimer();
     }
 
+    // Remove plane from map and collection
     destroy() {
         console.log(`${this.callSign} is being destroyed.`);
+
         if (this.map.getLayer(this.layerId)) {
             this.map.removeLayer(this.layerId);
         }
         if (this.map.getSource(this.sourceId)) {
             this.map.removeSource(this.sourceId);
         }
+
         if (this.map.getSource(this.routeSourceId)) {
             this.map.removeLayer(this.routeLayerId);
             this.map.removeSource(this.routeSourceId);
