@@ -8,13 +8,14 @@ import AccountPageView from '@/views/accountPage.vue';
 
 Vue.use(VueRouter);
 
+// Simple helper to check if user is authenticated (checks localStorage token)
 const isAuthenticated = () => !!localStorage.getItem('authToken');
 
 const routes = [
   {
     path: '/map',
     component: MapPageView,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true }  // Requires authentication
   },
   {
     path: '/login',
@@ -27,7 +28,7 @@ const routes = [
   {
     path: '/account',
     component: AccountPageView,
-    meta: {requiresAuth: true}
+    meta: { requiresAuth: true }  // Requires authentication
   },
 ];
 
@@ -35,6 +36,7 @@ const router = new VueRouter({
   routes
 });
 
+// Navigation guard to redirect unauthenticated users to login page if route requires auth
 router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated()) {
     next('/login');

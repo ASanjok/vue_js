@@ -243,37 +243,37 @@ class Plane {
         this.removePlaneFromCollection = removePlaneFromCollection;
         this.toggleSidebar = toggleSidebar;
         this.previousPositions = [];
-        this.routeSourceId = `route-${callSign}`; 
-        this.routeLayerId = `route-layer-${callSign}`; 
+        this.routeSourceId = `route-${callSign}`;
+        this.routeLayerId = `route-layer-${callSign}`;
         this.isChoosed = false;
         this.sidebarData = sidebardata;
 
         console.log(`${this.callSign} plane has been created.`);
 
-        const width = 16;  
-        const height = 16; 
+        const width = 16;
+        const height = 16;
         const bytesPerPixel = 4;
         const data = new Uint8Array(width * height * bytesPerPixel);
 
-        const triangleColor = [255, 100, 50, 255]; 
+        const triangleColor = [255, 100, 50, 255];
 
         const centerX = width / 2;
         const baseY = height - 1;
-        const peakY = 2; 
+        const peakY = 2;
 
         const baseWidthFactor = 0.3;
 
         for (let y = peakY; y <= baseY; y++) {
-            let halfWidth = ((y - peakY) / (baseY - peakY)) * (width * baseWidthFactor); 
+            let halfWidth = ((y - peakY) / (baseY - peakY)) * (width * baseWidthFactor);
             let leftX = Math.floor(centerX - halfWidth);
             let rightX = Math.ceil(centerX + halfWidth);
 
             for (let x = leftX; x <= rightX; x++) {
                 const offset = (y * width + x) * bytesPerPixel;
-                data[offset + 0] = triangleColor[0]; 
-                data[offset + 1] = triangleColor[1]; 
-                data[offset + 2] = triangleColor[2]; 
-                data[offset + 3] = triangleColor[3]; 
+                data[offset + 0] = triangleColor[0];
+                data[offset + 1] = triangleColor[1];
+                data[offset + 2] = triangleColor[2];
+                data[offset + 3] = triangleColor[3];
             }
         }
 
@@ -348,15 +348,15 @@ class Plane {
             console.log("\n\nПолученные позиции:\n", positions);
 
             const coordinates = positions.positions.map(pos => {
-                const wkt = pos.position; 
+                const wkt = pos.position;
                 const match = wkt.match(/POINT\s?\(([-\d.]+)\s+([-\d.]+)\)/);
                 if (match) {
                     const longitude = parseFloat(match[1]);
                     const latitude = parseFloat(match[2]);
                     return [longitude, latitude];
                 }
-                return null; 
-            }).filter(coord => coord !== null); 
+                return null;
+            }).filter(coord => coord !== null);
 
             if (coordinates.length === 0) {
                 console.error("Нет координат для отображения маршрута.");

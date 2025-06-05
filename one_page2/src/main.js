@@ -11,16 +11,12 @@ import 'vue-toastification/dist/index.css';
 
 export default {
   methods: {
-    // Function to refresh token by making an API call
-
   }
 }
 
-
-
 Vue.config.productionTip = false;
 
-// Axios interceptor for adding Authorization header
+// Axios interceptor to automatically add Authorization header with Bearer token on every request
 axios.interceptors.request.use(config => {
   const token = localStorage.getItem('authToken');
   if (token) {
@@ -32,41 +28,46 @@ axios.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 
-// Logout logic
+// Function to clear token and redirect user to login page (logout)
 function logout() {
   console.log('Logging out...');
   localStorage.removeItem('authToken');
   router.push('/login');
 }
 
-// Track token expiration and refresh if necessary
+// Function to track JWT token expiration, show warning toast 30 seconds before expiry,
+// and logout user once token is expired
 function trackTokenExpiration() {
   const token = localStorage.getItem('authToken');
-  console.log("in tracktokenexpiration")
+  console.log("in trackTokenExpiration");
   if (token) {
     try {
+      // Decode JWT token payload (base64 decode and parse JSON)
       const decodedToken = JSON.parse(atob(token.split('.')[1]));
-      const expirationTime = decodedToken.exp * 1000;
+      const expirationTime = decodedToken.exp * 1000; // JWT exp is in seconds, convert to ms
       const timeUntilExpiration = expirationTime - Date.now();
 
       console.log('Token will expire in:', timeUntilExpiration, 'ms');
 
-      // Show toast 30 seconds before token expires
-
+      // Show warning toast 30 seconds before token expires
       setTimeout(() => {
+        // Only show if token hasn't changed in localStorage
         if (token == localStorage.getItem('authToken')) {
           Vue.prototype.$toast.warning('Your session is about to expire in 30 seconds.', {
             timeout: true, // Notification does not disappear automatically
           });
         } else {
+          // Token was refreshed, restart tracking for new token
           trackTokenExpiration();
           return;
         }
-      }, timeUntilExpiration - 30000); // 30 seconds before expiration
+      }, timeUntilExpiration - 30000);
+
+      // Logout once token has expired
       setTimeout(() => {
         if (token == localStorage.getItem('authToken')) {
           logout();
-
+          // After logout, start waiting for new token and track again
           waitForTokenAndTrack();
         } else {
           trackTokenExpiration();
@@ -74,8 +75,7 @@ function trackTokenExpiration() {
         }
       }, timeUntilExpiration);
 
-
-      // Logout if token is expired
+      // Immediate logout if token is already expired
       if (timeUntilExpiration <= 0) {
         logout();
       }
@@ -85,41 +85,40 @@ function trackTokenExpiration() {
   }
 }
 
-// Wait for the token and start tracking
+// Poll localStorage every second until token appears, then start expiration tracking
 function waitForTokenAndTrack() {
   const checkTokenInterval = setInterval(() => {
-    console.log('whatching for token');
+    console.log('watching for token');
     const token = localStorage.getItem('authToken');
     if (token) {
       trackTokenExpiration();
       clearInterval(checkTokenInterval);
     }
-  }, 1000); // Check every second
+  }, 1000);
 }
 
-// Before each route, refresh token if necessary
+// Uncomment and implement if you want to refresh token on each route change
 // router.beforeEach(async (to, from, next) => {
 //   const token = localStorage.getItem('authToken');
-
 //   if (token) {
-//     // Обновить токен и перезапустить отслеживание
-//     await refreshToken(); // Функция обновления токена
-//     trackTokenExpiration(); // Перезапустить отслеживание истечения
+//     await refreshToken(); // Refresh token API call
+//     trackTokenExpiration(); // Restart tracking
 //   }
-
-//   // next(); // Proceed with route change
+//   next();
 // });
 
+// Create and mount Vue app instance, start tracking token expiration once mounted
 new Vue({
   router,
   store,
   render: h => h(App),
   mounted() {
-    waitForTokenAndTrack(); // Start checking for token when app is mounted
+    waitForTokenAndTrack();
   }
 }).$mount('#App');
 
+// Install toast plugin with configuration
 Vue.use(Toast, {
-  timeout: 30000, // Notification display time (50 seconds)
-  position: 'top-right' // Notification position
+  timeout: 30000,  // Notifications show for 30 seconds
+  position: 'top-right'  // Position of toast notifications
 });
